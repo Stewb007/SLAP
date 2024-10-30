@@ -14,6 +14,28 @@ const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 
+/**
+ * This hook retrieves the current user's session data from the 
+ * authentication service and manages the loading state. It 
+ * initializes with `user` as `null` and `loading` as `true`. 
+ * Once the user session is fetched, it updates the state 
+ * accordingly.
+ *
+ * @returns {Object} An object containing:
+ *   - {Object|null} user - The current user session object, or null if not logged in.
+ *   - {boolean} loading - A boolean indicating whether the session is being loaded.
+ *
+ * Usage:
+ * const { user, loading } = useUserSession();
+ *
+ * Example:
+ * const MyComponent = () => {
+ *   const { user, loading } = useUserSession();
+ *
+ *   if (loading) return <LoadingSpinner />;
+ *   return user ? <WelcomeMessage user={user} /> : <LoginPrompt />;
+ * };
+ */
 export const useUserSession = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
