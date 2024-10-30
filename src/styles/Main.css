@@ -1,0 +1,50 @@
+.login-redirection, .login-redirection-desc {
+    margin: 0;
+    text-align: center;
+    font-size: 20px;
+}
+
+.login-redirection-desc {
+    font-size: 14px;
+}
+.loader {
+    color: #47558a
+}
+.loader,
+.loader:after {
+  box-sizing: border-box;
+}
+.loader {
+  display: inline-block;
+  margin: auto;
+  margin-top: 1rem;
+  width: 40px;
+  height: 40px;
+}
+.loader:after {
+  content: " ";
+  display: block;
+  width: 32px;
+  height: 32px;
+  margin: 8px;
+  border-radius: 80%;
+  border: 6.4px solid currentColor;
+  border-color: currentColor transparent currentColor transparent;
+  animation: loader 1.2s linear infinite;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 3rem 1rem 3rem;
+}
+
+@keyframes loader {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+

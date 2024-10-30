@@ -1,0 +1,64 @@
+.Nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 1rem 3rem 1rem 3rem;
+    background-color: #47558a;
+    color: white;
+}
+
+.Nav img {
+    width: 70px;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+.right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.initials {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: grey;
+    color: white;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+}
+
+.profile {
+    display: flex;
+    flex-direction: row;
+    gap: 0.7rem;
+}
+
+.profile-right {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-right p {
+    margin: 0;
+}
+
+.profile-below {
+    font-size: 10px;
+    color: lightgray;
+}
+
+.profile-below span {
+    color: rgb(233, 108, 108);
+    cursor: pointer;
+}
+
+.profile-below span:hover {
+    text-decoration: underline;
+}
