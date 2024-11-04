@@ -8,7 +8,7 @@ function Auth() {
   const token = localStorage.getItem("token");
   useEffect(() => {
   if (token) {
-    navigate("/"); // Redirect to Home if token exists
+    navigate("/");
   }
   }, [token, navigate]);
 
@@ -35,7 +35,11 @@ function Auth() {
     try {
       const user = await authenticateUser(email, password);
       if (user) {
-        window.location.reload();
+        if (user.isAdmin) {
+          navigate("/admin");
+        } else {
+          window.location.reload();
+        }
       }
     } catch (err) {
       setError(err.message);

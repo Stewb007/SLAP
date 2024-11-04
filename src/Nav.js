@@ -1,7 +1,8 @@
 import './styles/Nav.css';
 import React, { useEffect, useState } from 'react';
 import { useUserSession, logout } from './firebase';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+ 
 function Nav() {
     const { user, loading } = useUserSession();
     const [initials, setInitials] = useState('')
@@ -19,7 +20,7 @@ function Nav() {
       return (
         <div className="Home">
           <p>Fetching...</p>
-        </div>
+       </div>
       )
     }
   
