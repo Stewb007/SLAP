@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, doc, query, where, serverTimestamp } from 'firebase/firestore'
+import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, doc, query, where, serverTimestamp, deleteDoc} from 'firebase/firestore'
 import { useState, useEffect } from 'react';
 
 const firebaseConfig = {
@@ -106,6 +106,23 @@ export const updateUser = async (userId, updates) => {
   } catch (error) {
     console.error('Error updating user: ', error);
     return 'Error updating user';
+  }
+};
+
+/**
+ * Deletes a user from the Firestore database.
+ * 
+ * @param {string} userId - The ID of the user to be deleted.
+ * @returns {Promise<string>} A message indicating the result of the operation.
+ */
+export const deleteUser = async (userId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await deleteDoc(userRef);
+    return 'User deleted successfully';
+  } catch (error) {
+    console.error('Error deleting user: ', error);
+    return 'Error deleting user';
   }
 };
 
