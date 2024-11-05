@@ -36,8 +36,13 @@
 .content {
   display: flex;
   flex-direction: column;
-  padding: 1rem 20rem 1rem 20rem;
 }
+
+.content, .Nav {
+  display: flex;
+  padding: 1rem clamp(1rem, 15vw, 20rem); /* min 1rem, max 20rem, scales with 10vw */
+}
+
 
 @keyframes loader {
   0% {

@@ -41,6 +41,7 @@
     padding: 1rem;
     border: 1px solid darkgray;
     border-radius: 8px;
+    overflow-x: auto;
     background-color: #fff;
 }
 
@@ -75,15 +76,40 @@
 
 .database-actions {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 1rem;
     justify-content: right
+}
+
+.search {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    justify-content: right;
+}
+
+.database-actions-list {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    justify-content: right;
 }
 
 .database-actions svg:hover {
     color: #47558a;
     cursor: pointer;
 }
+
+.disabled {
+    color: #dcdcdc;
+    cursor: not-allowed;
+}
+
+.disabled svg:hover {
+    color: #dcdcdc;
+    cursor: not-allowed;
+}
+
 
 .manage-users {
     margin: 20px;
@@ -107,6 +133,12 @@ th, td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left; /* Align text to the left */
+}
+
+.select {
+    margin: auto;
+    padding: 0;
+    text-align: center;
 }
 
 th {
