@@ -1,12 +1,13 @@
 import './styles/Nav.css';
 import React, { useEffect, useState } from 'react';
-import { useUserSession, logout } from './firebase';
+import { useUserSession, useLogout } from './firebase';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRightFromBracket} from '@fortawesome/free-solid-svg-icons'
  
 function Nav() {
     const { user, loading } = useUserSession();
     const [initials, setInitials] = useState('')
+    const logout = useLogout();
     useEffect(() => {
         if (!loading) {
             setInitials(user.name

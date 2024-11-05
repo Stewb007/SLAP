@@ -1,6 +1,6 @@
 import './styles/Auth.css';
 import React, { useEffect, useState } from 'react';
-import { authenticateUser } from './firebase';
+import { authenticateUser, searchUserByEmail, updateUser } from './firebase';
 import { useNavigate } from 'react-router-dom';
 
 function Auth() {
@@ -28,6 +28,36 @@ function Auth() {
     setPassword(event.target.value);
   };
 
+  const noAccess = async () => {
+    if (email === '') {
+      setShowTooltip(true);
+    } else {
+      searchUserByEmail(email).then((user) => {
+        if (user) {
+          while(true) {
+            let oldPassword = prompt("Please enter your old password:");
+            if (oldPassword === user.password) {
+              let newPassword = prompt("Please enter your new password:");
+              if (newPassword) {
+                alert("Password successfully changed!");
+                try {
+                  updateUser(user.id, { password: newPassword });
+                } catch (err) {
+                  console.error(err);
+                }
+                setPassword(newPassword);
+                authenticate();
+              }
+              break;
+            } else {
+              alert("Invalid password. Please try again.");
+            }
+          }
+        }
+      });
+    }
+  }
+
   const authenticate = async () => {
     isFetching(true);
     setError('');
@@ -35,7 +65,23 @@ function Auth() {
     try {
       const user = await authenticateUser(email, password);
       if (user) {
-        if (user.isAdmin) {
+        if (user.resetPasswordTarget) {
+          alert("You've been requested to change your password. Please do it now.");
+          let newPassword;
+          let confirmedPassword;
+          while (true) {
+            newPassword = prompt('Enter the new password for the user:');
+            if (!newPassword) return;
+            confirmedPassword = prompt('Confirm the new password for the user:');
+            if (newPassword === confirmedPassword) {
+              user.resetPasswordTarget = false;
+              break;
+            };
+            alert('Passwords do not match. Please try again.');
+          }
+          await updateUser(user.id, { password: confirmedPassword, resetPasswordTarget: false });
+        }
+        if (user.isAdmin ) {
           navigate("/admin");
         } else {
           window.location.reload();
@@ -63,7 +109,7 @@ function Auth() {
                 {error === "Invalid password" && (
                     <p className="email-tooltip">Please ensure you enter a valid <b>password</b>.</p>
                 )}
-                <p className='no-access'>Can't access your account?</p>
+                <p className='no-access' onClick={noAccess}>Forgot Password?</p>
             </div>
             <button onClick={authenticate} disabled={fetching} className='sign-in'>
                 {fetching ? 'Logging in...' : 'Login'}
