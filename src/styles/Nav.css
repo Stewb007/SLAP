@@ -13,6 +13,12 @@
     border-radius: 50%;
 }
 
+.nav-link {
+    color: white;
+    margin-right: 50px;
+}
+
+
 .right {
     display: flex;
     flex-direction: row;

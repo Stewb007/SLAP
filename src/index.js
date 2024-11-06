@@ -4,8 +4,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import Home from './Home';
 import Auth from './Auth'; // import your Auth component
+import Submissions from './Submissions';
+import SubmissionsPage from './SubmissionsPage';
 import reportWebVitals from './reportWebVitals';
 import ProtectedRoute from './ProtectedRoute';
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -21,6 +24,14 @@ root.render(
           }
         />
         <Route path="/auth" element={<Auth />} />
+        <Route
+          path="/submissions"
+          element={
+            <ProtectedRoute>
+              <SubmissionsPage />
+            </ProtectedRoute>
+          }
+        /> 
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

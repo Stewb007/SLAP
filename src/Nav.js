@@ -1,19 +1,20 @@
 import './styles/Nav.css';
 import React, { useEffect, useState } from 'react';
 import { useUserSession, logout } from './firebase';
+import { Link } from 'react-router-dom';
 
 function Nav() {
     const { user, loading } = useUserSession();
     const [initials, setInitials] = useState('')
     useEffect(() => {
-        if (!loading) {
+        if (!loading && user) {
             setInitials(user.name
             .split(' ')
             .map((word) => word.charAt(0).toUpperCase())
             .slice(0, 2) // Get only the first two initials
             .join(''));
         }
-    }, [loading])
+    }, [loading, user])
 
     if(loading) {
       return (
@@ -27,6 +28,8 @@ function Nav() {
       <div className="Nav">
         <img src='/images/logo-alt.png' alt='gsu-logo' />
         <div className='right'>
+          {/* Add submissions link here */}
+          <Link to="/submissions" className="nav-link">Submissions</Link>
             <p>Courses</p>
             <p></p>
             <div className='profile'>

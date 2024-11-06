@@ -1,0 +1,28 @@
+.submissions-page {
+    padding: 20px;
+}
+
+.banner {
+    background-color: darkblue;
+    color: white;
+    padding: 15px;
+    text-align: left;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.assignments {
+    margin-top: 20px;
+}
+
+h1 {
+    color: white; /* Change this color to your preferred color */
+}
+
+h3 {
+    color: black; /* Change this color to your preferred color */
+}
+
+a {
+    color: blue; /* Change this color to your preferred color for links */
+}

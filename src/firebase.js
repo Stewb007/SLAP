@@ -54,6 +54,21 @@ export const useUserSession = () => {
 };
 
 /**
+ * Retrieves a list of all submissions from the Firestore database.
+ * 
+ * @returns {Promise<Array<Object>>} An array of submission objects from the database.
+ */
+export const getSubmissions = async () => {
+  try {
+    const submissionsSnapshot = await getDocs(collection(db, 'submissions'));
+    const submissions = submissionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return submissions;
+  } catch (error) {
+    console.error('Error getting submissions: ', error);
+  }
+};
+
+/**
  * Creates a new user in the Firestore database.
  * 
  * @param {string} email - The email of the user.
