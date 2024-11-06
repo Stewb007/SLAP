@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import Home from './Home';
+import Courses from'./Courses'
+import CourseProjects from './CourseProjects';
 import Auth from './Auth'; // import your Auth component
 import reportWebVitals from './reportWebVitals';
 import ProtectedRoute from './ProtectedRoute';
@@ -17,6 +19,24 @@ root.render(
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+
+      <Route
+          path="/Courses"
+          element={
+            <ProtectedRoute>
+              <Courses />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/CourseProjects"
+          element={
+            <ProtectedRoute>
+              <CourseProjects />
             </ProtectedRoute>
           }
         />

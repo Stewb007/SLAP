@@ -1,10 +1,12 @@
 import './styles/Nav.css';
 import React, { useEffect, useState } from 'react';
 import { useUserSession, logout } from './firebase';
+import { useNavigate } from 'react-router-dom';
 
 function Nav() {
     const { user, loading } = useUserSession();
-    const [initials, setInitials] = useState('')
+    const [initials, setInitials] = useState('');
+    const navigate = useNavigate();
     useEffect(() => {
         if (!loading) {
             setInitials(user.name
@@ -27,7 +29,7 @@ function Nav() {
       <div className="Nav">
         <img src='/images/logo-alt.png' alt='gsu-logo' />
         <div className='right'>
-            <p>Courses</p>
+            <p onClick={() => navigate('./Courses')}>Courses</p>
             <p></p>
             <div className='profile'>
                 <div className='initials'>

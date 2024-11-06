@@ -1,5 +1,6 @@
+import userEvent from '@testing-library/user-event';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, doc, query, where, serverTimestamp } from 'firebase/firestore'
+import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, doc, query, where, serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore'
 import { useState, useEffect } from 'react';
 
 const firebaseConfig = {
@@ -229,3 +230,102 @@ export const getCourses = async () => {
     }
 };  
 export { db };
+
+
+/**
+ * Enrolls a user into a course if the capacity allows it.
+ * @param {string} userId - the ID of the user who wishes to enroll
+ * @param {string} courseCode - the ID of the coruse the users wants to enroll it
+ * @returns {Promise<void>} - Enroll the user in the capacity allows it.
+*/
+export const enrollUserInCourse = async (userId, courseCode) => {
+  try {
+    const coursesRef = collection(db, 'courses');
+    const coursesSnapshot = query(coursesRef, where('code', '==', courseCode));
+    const queryResult = await getDocs(coursesSnapshot);
+
+    if (queryResult.empty) {
+      console.log('Course not found');
+      return;
+    }
+
+    const course = queryResult.docs[0].data();
+    const courseCapacity = course.capacity;
+    const currentEnrollment = course.enrolled?.length || 0;
+
+    // Check if user is already enrolled
+    const userEnrollmentQuery = query(
+      collection(db, 'users'),
+      where('enrolled', 'array-contains', courseCode),
+      where('id', '==', userId)
+    );
+    const userEnrollmentResult = await getDocs(userEnrollmentQuery);
+
+    if (!userEnrollmentResult.empty) {
+      throw new Error('User already enrolled in the course');
+    }
+
+    // Check if the course capacity has been reached
+    if (currentEnrollment >= courseCapacity) {
+      throw new Error('Cannot enroll: course capacity has been reached');
+    }
+
+    // Add the courseCode to the user's enrolled array
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      enrolled: arrayUnion(courseCode)
+    });
+
+  } catch (error) {
+    console.error('Error enrolling user in course: ', error);
+    throw error;
+  }
+};
+/**
+ * Returns the list of courses that the user is currently enrolled in
+ * @param {string} userId - the ID of the user who wishes to view their courses
+ * @returns {Promise<Array<Object>>} - Retrieves a list of all the users courses.
+*/
+export const viewUserCourses = async (userId, courseCode) => {
+  try{
+    const userRef = doc(db, 'users', userId);
+    const userSnapshot = await getDoc(userRef);
+
+    const userData = userSnapshot.data();
+    const enrolledCourses = userData.enrolled || [];
+    console.log(enrolledCourses)
+    return enrolledCourses;
+
+  }catch (error) {
+    console.error('Error retrieving the users courses: ', error);
+    throw error;
+  }
+};
+
+/**
+ * Enrolls a user into a course if the capacity allows it.
+ * @param {string} userId - the ID of the user who wishes to drop out of the class
+ * @param {string} courseCode - the ID of the coruse the users wants to drop 
+ * @returns {Promise<void>} - remove the user
+*/
+
+export const removeUserCourse = async (userId,courseCode) => {
+  try{
+    const userRef = doc(db, 'users', userId);
+    
+    const enrolledCourses = await viewUserCourses(userId);
+
+    if (!enrolledCourses.includes(courseCode)) {
+      throw new Error('Cannot remove: course is not in course list');
+    }
+    await updateDoc(userRef, {
+      enrolled: arrayRemove(courseCode)
+    });
+
+  }catch(error) {
+    console.error('Error retrieving the users courses: ', error);
+    throw error;
+  }
+};
+
+
