@@ -81,11 +81,54 @@
     justify-content: right
 }
 
-.search {
+.filter {
     display: flex;
     flex-direction: row;
     gap: 1rem;
     justify-content: right;
+}
+
+.filter select {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #47558a;
+    color: white;
+}
+
+.filter-btn-disabled {
+    color: #dcdcdc;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: not-allowed;
+}
+
+.filter-btn {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    background-color: #019610;
+}
+
+.filter-reset-disabled {
+    color: #dcdcdc;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: not-allowed;
+}
+
+.filter-reset {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    background-color: #963001;
 }
 
 .database-actions-list {

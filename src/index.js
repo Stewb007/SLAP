@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import Home from './Home';
-import Auth from './Auth'; // import your Auth component
+import Auth from './Auth';
+import Admin from './Admin';
 import reportWebVitals from './reportWebVitals';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -21,6 +22,7 @@ root.render(
           }
         />
         <Route path="/auth" element={<Auth />} />
+        <Route path='/admin' element={<Admin />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
