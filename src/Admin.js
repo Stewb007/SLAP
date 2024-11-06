@@ -79,14 +79,39 @@ function ManageCourses() {
 
 function ManageUsers() {
     const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedUsers, setSelectedUsers] = useState([]);
+    const [selectedFilter, setFilter] = useState('Select Filter');
+    const [isFiltered, setFiltered] = useState(false);
     useEffect(() => {
         getUsers().then((users) => {
             setUsers(users);
         });
         setLoading(false);
     }, []);
+
+    const handleFilterChange = (e) => {
+        setFilter(e.target.value);
+    };
+
+    const filterUsers = () => {
+        if (selectedFilter === 'Select Filter') return;
+        if (selectedFilter === 'Alphabetical') {
+            setFilteredUsers(users.sort((a, b) => a.name.localeCompare(b.name)));
+        } else if (selectedFilter === 'Course') {
+            setFilteredUsers(users.filter(user => user.enrolled.length > 0));
+        } else if (selectedFilter === 'Instructor') {
+            setFilteredUsers(users.filter(user => user.isInstructor));
+        }
+        setFiltered(true);
+    }
+
+    const clearFilter = () => {
+        setFiltered(false);
+        setSelectedUsers([]);
+        setFilter('Select Filter');
+    }
 
     const handleCheckboxToggle = (userId) => {
         if (selectedUsers.includes(userId)) {
@@ -173,24 +198,30 @@ function ManageUsers() {
     return (
         <div className='manage-users'>
             <h2>Manage Users</h2>
-            <p>Retrieved {users.length} {users.length > 1 ? 'users' : 'user'}.</p>
+            <p>Retrieved {(isFiltered ? filteredUsers.length : users.length)} {(isFiltered ? filteredUsers.length : users.length) === 1 ? 'user' : 'users'}.</p>
             <div className='database-actions'>
-                <div className='search'>
-                    <input type='text' placeholder='Search Users' />
-                    <button>Search</button>
+                <div className='filter'>
+                    <select onChange={handleFilterChange} value={selectedFilter}>
+                        <option disabled>Select Filter</option>
+                        <option>Alphabetical</option>
+                        <option>Course</option>
+                        <option>Instructor</option>
+                    </select>
+                    <button onClick={selectedFilter === "Select Filter" ? null : filterUsers} className={selectedFilter !== "Select Filter" ? 'filter-btn' : 'filter-btn-disabled'}>Set Filter</button>
+                    <button onClick={isFiltered ? clearFilter : null} className={isFiltered ? 'filter-reset' : 'filter-reset-disabled'}>Clear</button>
                 </div>
                 <div className='database-actions-list'>
                     <p onClick={selectedUsers.length === 0 ? handleAddUser : null} 
                        className={selectedUsers.length === 0 ? '' : 'disabled'}>
-                        <FontAwesomeIcon icon={faUserPlus} size='l' title='Add User'/>
+                        <FontAwesomeIcon icon={faUserPlus} size='lg' title='Add User'/>
                     </p>
                     <p onClick={selectedUsers.length > 0 ? handleRemoveUsers : null} 
                        className={selectedUsers.length > 0 ? '' : 'disabled'}>
-                        <FontAwesomeIcon icon={faUserMinus} size='l' title='Remove User'/>
+                        <FontAwesomeIcon icon={faUserMinus} size='lg' title='Remove User'/>
                     </p>
                     <p onClick={selectedUsers.length > 0 ? handleRequestPasswordReset : null} 
                        className={selectedUsers.length > 0 ? '' : 'disabled'}>
-                        <FontAwesomeIcon icon={faUserLock} size='l' title='Request Password Reset on Login'/>
+                        <FontAwesomeIcon icon={faUserLock} size='lg' title='Request Password Reset on Login'/>
                     </p>
                     <p onClick={selectedUsers.length === 1 ? handleResetPassword : null} 
                        className={selectedUsers.length === 1 ? '' : 'disabled'}>
@@ -214,7 +245,7 @@ function ManageUsers() {
                     </tr>
                 </thead>
                 <tbody>
-                    {users.map((user, index) => (
+                    {(isFiltered ? filteredUsers : users).map((user, index) => (
                         <tr key={index}>
                             <td className='select'>
                                 <input
