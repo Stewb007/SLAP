@@ -1,7 +1,7 @@
 import './styles/Main.css';
 import React, { useEffect, useState } from 'react';
 import Nav from './Nav';
-import { getCourses, useUserSession, logout } from './firebase';
+import { getCourses, useUserSession, logout, enrollUserInCourse, viewUserCourses, removeUserCourse } from './firebase';
 import { useNavigate } from 'react-router-dom';
 
 function Home() {
@@ -28,6 +28,9 @@ function Home() {
       <Nav />
       <div className='content'>
         <h1>Logged in as {user.name} who is a {!user.isAdmin && !user.isInstructor ? "Student" : user.isAdmin ? "Admin" : "Instructor"} </h1>
+        <button onClick={() => enrollUserInCourse(user.id,"MTH108")}> </button>
+        <button onClick={() => viewUserCourses(user.id)}> </button>
+        <button onClick={() => removeUserCourse(user.id,"MTH108")}> </button>
       </div>
     </div>
   );
