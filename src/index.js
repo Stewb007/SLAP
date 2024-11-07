@@ -5,7 +5,8 @@ import './index.css';
 import Home from './Home';
 import Courses from'./Courses'
 import CourseProjects from './CourseProjects';
-import Auth from './Auth'; // import your Auth component
+import Auth from './Auth';
+import Admin from './Admin';
 import reportWebVitals from './reportWebVitals';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -41,6 +42,7 @@ root.render(
           }
         />
         <Route path="/auth" element={<Auth />} />
+        <Route path='/admin' element={<Admin />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

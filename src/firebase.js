@@ -1,6 +1,7 @@
 import userEvent from '@testing-library/user-event';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, doc, query, where, serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore'
+import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, doc, query, where, serverTimestamp, deleteDoc, arrayUnion, arrayRemove} from 'firebase/firestore'
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
 const firebaseConfig = {
@@ -93,13 +94,11 @@ export const createUser = async (name, email, password, student_number, year, pr
  * @returns {Promise<string>} A message indicating the result of the operation.
  */
 export const updateUser = async (userId, updates) => {
-  const validFields = ['email', 'password', 'student_number', 'year', 'program', 'enrolled']; // Define valid fields
+  const validFields = ['email', 'password', 'student_number', 'year', 'program', 'enrolled', 'resetPasswordTarget']; // Define valid fields
   const invalidFields = Object.keys(updates).filter(field => !validFields.includes(field));
-
   if (invalidFields.length > 0) {
     return `Invalid fields: ${invalidFields.join(', ')}`;
   }
-
   try {
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, updates);
@@ -107,6 +106,23 @@ export const updateUser = async (userId, updates) => {
   } catch (error) {
     console.error('Error updating user: ', error);
     return 'Error updating user';
+  }
+};
+
+/**
+ * Deletes a user from the Firestore database.
+ * 
+ * @param {string} userId - The ID of the user to be deleted.
+ * @returns {Promise<string>} A message indicating the result of the operation.
+ */
+export const deleteUser = async (userId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    await deleteDoc(userRef);
+    return 'User deleted successfully';
+  } catch (error) {
+    console.error('Error deleting user: ', error);
+    return 'Error deleting user';
   }
 };
 
@@ -128,7 +144,7 @@ export const authenticateUser = async (email, password) => {
       }
   
       const userDoc = querySnapshot.docs[0];
-      const user = userDoc.data();
+      const user = { id: userDoc.id, ...userDoc.data() };
       const isMatch = password === user.password;
   
       if (!isMatch) {
@@ -169,12 +185,19 @@ export const retrieveSession = async () => {
 
 /**
  * Clears the current session
- */
-export const logout = () => {
-  localStorage.removeItem("token");
-  sessionStorage.removeItem("isVerified");
-  window.location.reload()
-}
+ * 
+*/
+export const useLogout = () => {
+  const navigate = useNavigate();
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("isVerified");
+    navigate("/auth");
+  };
+
+  return logout;
+};
 
 /**
  * Creates a new course in the Firestore database.
@@ -212,6 +235,28 @@ export const getUsers = async () => {
     return users;
   } catch (error) {
     console.error('Error getting users: ', error);
+  }
+};
+
+/** Searches the database for a user with a certain email 
+ * 
+ * @param {string} email - The email of the user to search for.
+ * @returns {Promise<Object>} The user object if found, or null if not found.
+*/
+export const searchUserByEmail = async (email) => {
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('email', '==', email));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return null;
+    }
+
+    const userDoc = querySnapshot.docs[0];
+    return { id: userDoc.id, ...userDoc.data() };
+  } catch (error) {
+    console.error('Error searching for user: ', error);
   }
 };
 

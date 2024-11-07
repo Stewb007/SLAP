@@ -2,10 +2,19 @@ import './styles/Main.css';
 import React, { useEffect, useState } from 'react';
 import Nav from './Nav';
 import { getCourses, useUserSession, logout, enrollUserInCourse, viewUserCourses, removeUserCourse } from './firebase';
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
   const { user, loading } = useUserSession();
-
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!loading) {
+      if(user.isAdmin) {
+          navigate('/admin');
+      }
+    }
+  }, [user, navigate]);
+  
   if(loading) {
     return (
       <div className="Home">

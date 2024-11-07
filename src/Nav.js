@@ -1,12 +1,15 @@
 import './styles/Nav.css';
 import React, { useEffect, useState } from 'react';
-import { useUserSession, logout } from './firebase';
-import { useNavigate } from 'react-router-dom';
+import { useUserSession, useLogout } from './firebase';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowRightFromBracket} from '@fortawesome/free-solid-svg-icons'
+ import { useNavigate } from 'react-router-dom';
 
 function Nav() {
     const { user, loading } = useUserSession();
     const [initials, setInitials] = useState('');
     const navigate = useNavigate();
+    const logout = useLogout();
     useEffect(() => {
         if (!loading) {
             setInitials(user.name
@@ -21,7 +24,7 @@ function Nav() {
       return (
         <div className="Home">
           <p>Fetching...</p>
-        </div>
+       </div>
       )
     }
   
@@ -29,8 +32,13 @@ function Nav() {
       <div className="Nav">
         <img src='/images/logo-alt.png' alt='gsu-logo' />
         <div className='right'>
-            <p onClick={() => navigate('./Courses')}>Courses</p>
-            <p></p>
+            {user.isAdmin ?
+                <></>
+                :
+                <div className='right-content'>
+                  <p onClick={() => navigate('./Courses')}>Courses</p>
+                </div>
+            }
             <div className='profile'>
                 <div className='initials'>
                     <p>{initials}</p>
@@ -38,7 +46,7 @@ function Nav() {
                 <div className='profile-right'>
                     <p>{user.name}</p>
                     {user.isAdmin ?
-                        <p className='profile-below'>Administrator | <span onClick={logout}>Logout</span></p>
+                        <p className='profile-below'>Administrator |<span onClick={logout}> <FontAwesomeIcon icon={faArrowRightFromBracket} /> Logout</span></p>
                         :
                         <p className='profile-below'>{user.student_number} | <span onClick={logout}>Logout</span></p>
                     }
