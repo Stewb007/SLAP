@@ -1,68 +1,93 @@
-import "./styles/Main.css";
-import React, { useEffect, useState } from "react";
-import Nav from "./Nav";
+// “Projects” page:
+//   - “New Project” button for adding a new assignment
+//   - Assignment list, each assignment is clickable for details.
+//     - “View document” button for instruction document → new window
+//     - “View Submission history” button → new window
+//     - “Upload Instruction document” button -> file selection
+//     - “Submit Evaluation” button → new window
+//     - “Edit Project” button → new window
+//       - “Save” button
 
-function CourseProjects() {
+import React, { useState } from "react";
+
+const ProjectsPage = ({ courseCode, assignments }) => {
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const [instructionFile, setInstructionFile] = useState(null);
+
+  // Handle selection of an assignment to show details
+  const handleAssignmentClick = (assignment) => {
+    setSelectedAssignment(assignment);
+  };
+
+  // Handle instruction file upload
+  const handleFileUpload = (event) => {
+    setInstructionFile(event.target.files[0]);
+    // Here you can also handle the file upload process (e.g., to a server or Firebase)
+  };
+
   return (
-    <div className="CourseProjects">
-      <Nav />
-      <div className="content">
-        <h1>Course Projects</h1>
-        <p>Welcome to the Courses page! Course Projects can be viewed here.</p>
+    <div>
+      <h1>{courseCode} Projects</h1>
 
-        <details>
-          <summary
-            style={{
-              fontSize: "1.2em",
-              fontWeight: "bold",
-              color: "#333",
-              cursor: "pointer",
-            }}
-          >
-            Math Project 1
-          </summary>
-          <div>
-            <p>Project Description: Algebra and Equations</p>
-            <p>Due Date: 11/12/2024</p>
-          </div>
-        </details>
+      {/* New Project button */}
+      <button onClick={() => alert("New Project")}>New Project</button>
 
-        <details>
-          <summary
-            style={{
-              fontSize: "1.2em",
-              fontWeight: "bold",
-              color: "#333",
-              cursor: "pointer",
-            }}
-          >
-            Math Project 2
-          </summary>
-          <div>
-            <p>Project Description: Geometry and Shapes</p>
-            <p>Due Date: 11/18/2024</p>
+      {/* Assignment list */}
+      <div>
+        {assignments.map((assignment, index) => (
+          <div key={index} onClick={() => handleAssignmentClick(assignment)}>
+            <h3>{assignment.assignmentName}</h3>
+            <p>{assignment.description}</p>
           </div>
-        </details>
-
-        <details>
-          <summary
-            style={{
-              fontSize: "1.2em",
-              fontWeight: "bold",
-              color: "#333",
-              cursor: "pointer",
-            }}
-          >
-            Math Project 3
-          </summary>
-          <div>
-            <p>Project Description: Calculus Basics</p>
-            <p>Due Date: 11/30/2024</p>
-          </div>
-        </details>
+        ))}
       </div>
+
+      {/* Assignment details modal */}
+      {selectedAssignment && (
+        <div className="assignment-details">
+          <h2>{selectedAssignment.assignmentName}</h2>
+          <p>{selectedAssignment.description}</p>
+
+          {/* Instruction files */}
+          <h4>Instruction Files:</h4>
+          {selectedAssignment.instructionFiles.map((file, index) => (
+            <div key={index}>
+              <a href={file} target="_blank" rel="noopener noreferrer">
+                View Document {index + 1}
+              </a>
+            </div>
+          ))}
+
+          {/* Action buttons */}
+          <button
+            onClick={() => window.open("view-submission-history-url", "_blank")}
+          >
+            View Submission History
+          </button>
+
+          <button>
+            <label htmlFor="upload-instruction-file">
+              Upload Instruction Document
+            </label>
+            <input
+              id="upload-instruction-file"
+              type="file"
+              onChange={handleFileUpload}
+              style={{ display: "none" }}
+            />
+          </button>
+
+          <button onClick={() => alert("Submit Evaluation")}>
+            Submit Evaluation
+          </button>
+
+          <button onClick={() => alert("Edit Project")}>Edit Project</button>
+
+          <button onClick={() => setSelectedAssignment(null)}>Close</button>
+        </div>
+      )}
     </div>
   );
-}
+};
 
-export default CourseProjects;
+export default ProjectsPage;
