@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Nav from './Nav';
 import { getCourses, useUserSession, logout, enrollUserInCourse, viewUserCourses, removeUserCourse } from './firebase';
 import { useNavigate } from 'react-router-dom';
-import ProjectsPage from "./instructor-Project-page";
+import ProjectsPage from "./CourseProjects";
 
 function Home() {
   const { user, loading } = useUserSession();
@@ -29,7 +29,8 @@ function Home() {
   const assignments = [
     {
       assignmentName: "Assignment 1",
-      description: "This is the first assignment.",
+      description:
+        "This is a description for the first assignment.",
       instructionFiles: [
         "https://example.com/file1.pdf",
         "https://example.com/file2.pdf",
@@ -42,11 +43,12 @@ function Home() {
     },
     {
       assignmentName: "Assignment 2",
-      description: "This is the second assignment.",
+      description:
+        "This is a description for the second assignment.",
       instructionFiles: ["https://example.com/file3.pdf"],
       groups: [["Student7", "Student8"]],
       studentsNotInGroup: ["Student9"],
-    },
+    }
   ];
 
   return (
@@ -61,7 +63,16 @@ function Home() {
             ? "Admin"
             : "Instructor"}{" "}
         </h1>
-        <ProjectsPage courseCode={courseCode} assignments={assignments} />
+        <ProjectsPage
+          courseCode={"(Instructor pov) " + courseCode}
+          assignments={assignments}
+          isInstructor={user.isInstructor}
+        />
+        <ProjectsPage
+          courseCode={"(Student pov) " + courseCode}
+          assignments={assignments}
+          isInstructor={!user.isInstructor}
+        />
       </div>
     </div>
   );
