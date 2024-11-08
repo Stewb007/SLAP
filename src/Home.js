@@ -3,16 +3,21 @@ import React, { useEffect, useState } from 'react';
 import Nav from './Nav';
 import { getCourses, useUserSession, logout } from './firebase';
 import Submissions from './Submissions';
-import { BrowserRouter as Router, Link, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Link, Routes, Route, useNavigate } from 'react-router-dom';
 import SubmissionsPage from './SubmissionsPage';
 import Auth from './Auth';
 
 function Home() {
   const { user, loading } = useUserSession();
-
-  //log the user object to check if it's defined
-  console.log("User data:", user);
-
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!loading) {
+      if(user.isAdmin) {
+          navigate('/admin');
+      }
+    }
+  }, [user, navigate]);
+  
   if(loading) {
     return (
       <div className="Home">

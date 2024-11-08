@@ -3,9 +3,10 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import Home from './Home';
-import Auth from './Auth'; // import your Auth component
 import Submissions from './Submissions';
 import SubmissionsPage from './SubmissionsPage';
+import Auth from './Auth';
+import Admin from './Admin';
 import reportWebVitals from './reportWebVitals';
 import ProtectedRoute from './ProtectedRoute';
 
@@ -32,6 +33,7 @@ root.render(
             </ProtectedRoute>
           }
         /> 
+        <Route path='/admin' element={<Admin />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

@@ -1,11 +1,14 @@
 import './styles/Nav.css';
 import React, { useEffect, useState } from 'react';
-import { useUserSession, logout } from './firebase';
 import { Link } from 'react-router-dom';
-
+import { useUserSession, useLogout } from './firebase';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowRightFromBracket} from '@fortawesome/free-solid-svg-icons'
+ 
 function Nav() {
     const { user, loading } = useUserSession();
     const [initials, setInitials] = useState('')
+    const logout = useLogout();
     useEffect(() => {
         if (!loading && user) {
             setInitials(user.name
@@ -20,7 +23,7 @@ function Nav() {
       return (
         <div className="Home">
           <p>Fetching...</p>
-        </div>
+       </div>
       )
     }
   
@@ -32,6 +35,13 @@ function Nav() {
           <Link to="/submissions" className="nav-link">Submissions</Link>
             <p>Courses</p>
             <p></p>
+            {user.isAdmin ?
+                <></>
+                :
+                <div className='right-content'>
+                  <p>Courses</p>
+                </div>
+            }
             <div className='profile'>
                 <div className='initials'>
                     <p>{initials}</p>
@@ -39,7 +49,7 @@ function Nav() {
                 <div className='profile-right'>
                     <p>{user.name}</p>
                     {user.isAdmin ?
-                        <p className='profile-below'>Administrator | <span onClick={logout}>Logout</span></p>
+                        <p className='profile-below'>Administrator |<span onClick={logout}> <FontAwesomeIcon icon={faArrowRightFromBracket} /> Logout</span></p>
                         :
                         <p className='profile-below'>{user.student_number} | <span onClick={logout}>Logout</span></p>
                     }
