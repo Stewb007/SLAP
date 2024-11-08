@@ -227,10 +227,13 @@ export const useLogout = () => {
 export const createCourse = async (courseName, courseCode, description, capacity) => {
     try {
       const courseRef = await addDoc(collection(db, 'courses'), {
-        courseName,
-        courseCode,
+        name: courseName,
+        code: courseCode,
         description,
         capacity,
+        enrolled: 0,
+        instructor: '',
+        assignments: [],
         createdAt: serverTimestamp(),
       });
       return courseRef;
@@ -450,6 +453,83 @@ export const removeUserCourse = async (userId,courseCode) => {
   }catch(error) {
     console.error('Error retrieving the users courses: ', error);
     throw error;
+  }
+};
+
+
+/** 
+ * Retrieves a list of active System SLAPS from the Firestore database.
+ * 
+ * @returns {Promise<Array<Object>>} An array of active SLAP SYS objects from the database.
+*/
+export const getSystemSLAPS = async () => {
+  try {
+    const slapsSnapshot = await getDocs(collection(db, 'slaps'));
+    const slaps = slapsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return slaps.filter(slap => slap.type === 'SYS' && slap.isActive);
+  } catch (error) {
+    console.error('Error getting system slaps: ', error);
+  }
+};
+
+/**
+ * Retrieves a list of all SLAPS from the Firestore database.
+ * 
+ * @returns {Promise<Array<Object>>} An array of SLAP objects from the database.
+ */
+export const getSLAPS = async () => {
+  try {
+    const slapsSnapshot = await getDocs(collection(db, 'slaps'));
+    const slaps = slapsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return slaps;
+  } catch (error) {
+    console.error('Error getting slaps: ', error);
+  }
+}
+
+/**
+ * Creates a new SLAP in the Firestore database.
+ * 
+ * @param {string} content - The content of the SLAP.
+ * @param {string} type - The type of the SLAP (SYS or USR).
+ * @param {boolean} isActive - A boolean indicating whether the SLAP is active.
+ * @returns {Promise<DocumentReference>} A reference to the newly created SLAP document. 
+ */
+export const createSLAP = async (content, type, isActive) => {
+  try {
+    const slapRef = await addDoc(collection(db, 'slaps'), {
+      content,
+      type,
+      isActive,
+      createdAt: serverTimestamp(),
+    });
+    return slapRef;
+  } catch (error) {
+    console.error('Error creating slap: ', error);
+  }
+};
+
+/**
+ * Updates a SLAP in the Firestore database.
+ * 
+ * @param {string} slapId - The ID of the SLAP to be updated.
+ * @param {Object} updates - An object containing the fields to be updated.
+ * @returns {Promise<string>} A message indicating the result of the operation.
+ */
+export const updateSLAP = async (slapId, updates) => {
+  const validFields = ['content', 'type', 'isActive']; // Define valid fields
+  const invalidFields = Object.keys(updates).filter(field => !validFields.includes(field));
+  if (invalidFields.length > 0) {
+    return `Invalid fields: ${invalidFields.join(', ')}`;
+  }
+  try {
+    console.log(slapId, updates)
+    const slapRef = doc(db, 'slaps', slapId);
+    await updateDoc(slapRef, updates);
+    return 'SLAP updated successfully';
+  } catch (error) {
+    console.error('Error updating slap: ', error);
+    return 'Error updating slap';
   }
 };
 

@@ -2,8 +2,8 @@ import './styles/Admin.css'
 import Nav from './Nav'
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHandPointer, faArrowsRotate, faUserPlus, faUserMinus, faAsterisk, faUserLock, faPlusCircle, faMinusCircle, faTimesCircle} from '@fortawesome/free-solid-svg-icons';
-import { useUserSession, getCourses, getUsers, createUser, deleteUser, updateUser, deleteCourse, enrollUserInCourse, searchUserByEmail, usersInCourse, removeUserCourse} from './firebase';
+import { faHandPointer, faArrowsRotate, faUserPlus, faUserMinus, faAsterisk, faUserLock, faPlusCircle, faMinusCircle, faTimesCircle, faEyeSlash, faEye} from '@fortawesome/free-solid-svg-icons';
+import { useUserSession, getCourses, getUsers, createUser, deleteUser, updateUser, deleteCourse, enrollUserInCourse, searchUserByEmail, usersInCourse, removeUserCourse, getSLAPS, createSLAP, updateSLAP, createCourse} from './firebase';
 
 function Admin() {
     const {user, loading} = useUserSession();
@@ -78,16 +78,19 @@ function ManageCourses() {
         if (!code) return;
         const name = prompt('Enter the course name:');
         if (!name) return;
-        const instructor = prompt('Enter the instructor name:');
-        if (!instructor) return;
         const capacity = prompt('Enter the course capacity:');
         if (!capacity) return;
+        const description = prompt('Enter the course description:');
+        if (!description) return;
+        createCourse(name, code, description, capacity);
+        refreshCourses();
     };
 
     const handleRemoveCourse = () => {
         selectedCourses.forEach(course => {
             deleteCourse(course);
         });
+        refreshCourses();
         setSelectedCourses([]);
     };
 
@@ -181,8 +184,9 @@ function ManageCourses() {
                 </thead>
                 <tbody>
                     {courses.map((course, index) => (
+                        <>
                         <tr key={index}>
-                            <td className='select'>
+                            <td className='select' rowSpan={2}>
                                 <input
                                     type='checkbox'
                                     checked={selectedCourses.includes(course.code)}
@@ -196,6 +200,10 @@ function ManageCourses() {
                             <td className='view-users' onClick={() => toggleEnrolled(course.code)}>View Users</td>
                             <td>{course.assignments.length}</td>
                         </tr>
+                        <tr>
+                            <td colSpan='7' className='course-description'><b>Description:</b> {course.description}</td>
+                        </tr>
+                        </>
                     ))}
                 </tbody>
             </table>
@@ -205,6 +213,7 @@ function ManageCourses() {
                         <FontAwesomeIcon icon={faTimesCircle} className="modal-close-icon" onClick={() => setShowModal(false)} />
                         <h3>Enrolled Users</h3>
                         <ul className='enrolled-list'>
+                            {enrolledUsers.length === 0 && <p>No users enrolled in this course.</p>}
                             {enrolledUsers.map((user, index) => (
                                 <li className='enrolled-entry' key={index}>
                                     <p>{user.name} ({user.email}, {user.isInstructor ? <b>Instructor</b> : <b>Student</b>})</p>
@@ -414,9 +423,108 @@ function ManageUsers() {
 }
 
 function SystemNotifications() {
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedNotifications, setSelectedNotifications] = useState([]);
+    useEffect(() => {
+        getSLAPS().then((slaps) => {
+            setNotifications(slaps);
+        });
+        setLoading(false);
+    }, []);
+
+    const handleSLAPCreate = () => {
+        const content = prompt('Enter the content of the notification:');
+        if (!content) return;
+        createSLAP(content, 'SYS', false);
+        refreshSLAPS();
+    };
+
+    const handleSLAPDisable = () => {
+        selectedNotifications.forEach(notification => {
+            updateSLAP(notification, { isActive: false });
+        });
+        refreshSLAPS();
+    };
+
+    const handleSLAPEnable = () => {
+        const activeNotification = notifications.find(notification => notification.isActive);
+        if (activeNotification) {
+            updateSLAP(activeNotification.id, { isActive: false });
+        }
+        selectedNotifications.forEach(notification => {
+            updateSLAP(notification, { isActive: true });
+        });
+        refreshSLAPS();
+    };
+
+    const handleCheckboxToggle = (notificationId) => {
+        if (selectedNotifications.includes(notificationId)) {
+            setSelectedNotifications(selectedNotifications.filter(id => id !== notificationId));
+        } else {
+            setSelectedNotifications([...selectedNotifications, notificationId]);
+        }
+    }
+
+    const refreshSLAPS = async () => {
+        setLoading(true);
+        const slaps = await getSLAPS();
+        setNotifications(slaps);
+        setLoading(false);
+    };
+
+    if (loading) {
+        return (
+            <div className='fetching-admin'>
+                <FontAwesomeIcon icon={faArrowsRotate} spin/>
+            </div>
+        )
+    }
+
     return (
         <div className='sys-notif'>
             <h2>System Notifications</h2>
+            <p>Retrieved {notifications.length} {notifications.length === 1 ? 'notification' : 'notifications'}. <br/><i>Only one System Wide notification can be active at <b>once</b>.</i></p>
+            <div className='database-actions-list'>
+                <p onClick={selectedNotifications.length === 0 ? handleSLAPCreate : null} 
+                       className={selectedNotifications.length === 0 ? '' : 'disabled'}>
+                    <FontAwesomeIcon icon={faPlusCircle} size='lg' title='Create Notification'/>
+                </p>
+                <p onClick={selectedNotifications.length === 1 ? handleSLAPDisable : null} 
+                       className={selectedNotifications.length === 1 ? '' : 'disabled'}>
+                        <FontAwesomeIcon icon={faEyeSlash} size='lg' title='Disable SLAP'/>
+                </p>
+                <p onClick={selectedNotifications.length === 1 ? handleSLAPEnable : null}
+                          className={selectedNotifications.length === 1 ? '' : 'disabled'}>
+                            <FontAwesomeIcon icon={faEye} size='lg' title='Enable SLAP'/>
+                </p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style={{textAlign:'center'}}>Select</th>
+                        <th>Content</th>
+                        <th>Is Active</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {notifications.map((notification, index) => (
+                        <tr key={index}>
+                            <td className='select'>
+                                <input
+                                    type='checkbox'
+                                    checked={selectedNotifications.includes(notification.id)}
+                                    onChange={() => handleCheckboxToggle(notification.id)}
+                                />
+                            </td>
+                            <td>{notification.content}</td>
+                            <td>{notification.isActive ? 'Yes' : 'No'}</td>
+                            <td>{notification.type === 'SYS' ? 'System Wide' : <span><b>Course:</b> notification.type</span>}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     )
 }
