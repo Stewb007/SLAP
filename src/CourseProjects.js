@@ -4,10 +4,8 @@ const ProjectsPage = ({ courseCode, assignments, isInstructor }) => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [instructionFile, setInstructionFile] = useState(null);
 
-  // Handle instruction file upload
   const handleFileUpload = (event) => {
     setInstructionFile(event.target.files[0]);
-    // Here you can handle the actual file upload logic, e.g., uploading to Firebase or a server
   };
 
   return (
@@ -26,13 +24,11 @@ const ProjectsPage = ({ courseCode, assignments, isInstructor }) => {
               borderRadius: "5px",
             }}
           >
-            {/* Left side: Assignment Details */}
             <div>
               <h2>{assignment.assignmentName}</h2>
               <p>{assignment.description}</p>
             </div>
 
-            {/* Right side: Control Buttons */}
             <div
               style={{ display: "flex", flexDirection: "column", gap: "10px" }}
             >

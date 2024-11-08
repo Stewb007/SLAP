@@ -24,7 +24,6 @@ function Home() {
     );
   }
 
-  // Sample manual data for ProjectsPage
   const courseCode = "CS101";
   const assignments = [
     {
