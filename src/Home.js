@@ -3,10 +3,9 @@ import React, { useEffect, useState } from 'react';
 import Nav from './Nav';
 import { getCourses, useUserSession, logout, enrollUserInCourse, viewUserCourses, removeUserCourse } from './firebase';
 import { useNavigate } from 'react-router-dom';
-import Banner from './Banner'; // Import the Banner component
 import ProjectsPage from "./CourseProjects";
 import CourseNotifications from './CourseNotifications';
-import GroupsPage from './GroupsPage'; // Import the GroupsPage component
+import GroupsPage from './GroupsPage';
 
 function Home() {
   const { user, loading } = useUserSession();
@@ -66,7 +65,6 @@ function Home() {
 
   return (
     <div className="Home">
-      <Banner /> {/* Use the Banner component */}
       <Nav />
       <div className="content">
         <h1>
@@ -77,18 +75,7 @@ function Home() {
             ? "Admin"
             : "Instructor"}{" "}
         </h1>
-        <CourseNotifications notifications={notifications} />
-        <GroupsPage groups={groups} />
-        <ProjectsPage
-          courseCode={"(Instructor pov, for dev purposes) " + courseCode}
-          assignments={assignments}
-          isInstructor={user.isInstructor}
-        />
-        <ProjectsPage
-          courseCode={"(Student pov, for dev purposes) " + courseCode}
-          assignments={assignments}
-          isInstructor={!user.isInstructor}
-        />
+
       </div>
     </div>
   );

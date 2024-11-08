@@ -163,7 +163,7 @@ function ManageCourses() {
                     </p>
                     <p onClick={selectedCourses.length > 0 ? handleRemoveCourse : null} 
                        className={selectedCourses.length > 0 ? '' : 'disabled'}>
-                        <FontAwesomeIcon icon={faMinusCircle} size='lg' title='Remove User'/>
+                        <FontAwesomeIcon icon={faMinusCircle} size='lg' title='Remove Course'/>
                     </p>
                     <p onClick={selectedCourses.length > 0 ? handleEnrollUser : null} 
                        className={selectedCourses.length > 0 ? '' : 'disabled'}>

@@ -396,7 +396,7 @@ export const usersInCourse = async (courseCode) => {
 
 /**
  * Returns the list of courses that the user is currently enrolled in
- * @param {string} courseCode - the ID of the user who wishes to view their courses
+ * @param {string} userId - the ID of the user who wishes to view their courses
  * @returns {Promise<Array<Object>>} - Retrieves a list of all the user's course details.
 */
 export const viewUserCourses = async (userId) => {
@@ -405,15 +405,13 @@ export const viewUserCourses = async (userId) => {
     const userSnapshot = await getDoc(userRef);
     const userData = userSnapshot.data();
     const enrolledCourseCodes = userData.enrolled || [];
-
-    // Fetch details of each enrolled course
-    const enrolledCourses = await Promise.all(
-      enrolledCourseCodes.map(async (courseCode) => {
-        const courseRef = doc(db, 'courses', courseCode);  // Assuming courses are stored in a 'courses' collection
-        const courseSnapshot = await getDoc(courseRef);
-        return { id: courseCode, ...courseSnapshot.data() };
-      })
-    );
+    const enrolledCourses = [];
+    for (const courseCode of enrolledCourseCodes) {
+      const courseQuery = query(collection(db, 'courses'), where('code', '==', courseCode));
+      const courseQueryResult = await getDocs(courseQuery);
+      const courseData = courseQueryResult.docs[0].data();
+      enrolledCourses.push({ id: courseQueryResult.docs[0].id, ...courseData });
+    }
 
     return enrolledCourses;
 
@@ -533,4 +531,37 @@ export const updateSLAP = async (slapId, updates) => {
   }
 };
 
+/**
+ * Create an assignment for a course
+ * 
+ * @param {string} courseCode - The code of the course the assignment belongs to.
+ * @param {string} assignmentName - The name of the assignment.
+ * @param {string} description - The description of the assignment.
+ * @param {string} fileURL - The URL of the instruction file for the assignment.
+ * @param {Array<Array<string>>} group - An array containing an array of student IDS in the group.
+ */
+export const createAssignment = async (courseCode, assignmentName, description, fileURL, groups) => {
+  try {
+    const courseQuery = query(collection(db, 'courses'), where('code', '==', courseCode));
+    const courseQueryResult = await getDocs(courseQuery);
+    const courseRef = doc(db, 'courses', courseQueryResult.docs[0].id);
+    const courseData = courseQueryResult.docs[0].data();
+    const assignments = courseData.assignments || [];
+    const mappedGroups = groups.reduce((acc, group, index) => {
+      acc[`group${index + 1}`] = group;
+      return acc;
+    }, {});
+    const newAssignment = {
+      assignmentName,
+      description,
+      instructionFiles: [fileURL],
+      groups: mappedGroups,
+      studentsNotInGroup: [],
+    };
+    assignments.push(newAssignment);
+    await updateDoc(courseRef, { assignments });
+  } catch (error) {
+    console.error('Error creating assignment: ', error);
+  }
+};
 

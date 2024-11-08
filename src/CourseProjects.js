@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useUserSession } from "./firebase";
 import "./styles/ProjectsPage.css";
 
-const ProjectsPage = ({ courseCode, assignments, isInstructor }) => {
-  const [selectedAssignment, setSelectedAssignment] = useState(null);
+function CourseProjects({ user, course }) {
   const [instructionFile, setInstructionFile] = useState(null);
   const [showNewProjectInput, setShowNewProjectInput] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
-
-  // Handle instruction file upload
   const handleFileUpload = (event) => {
     setInstructionFile(event.target.files[0]);
   };
@@ -30,9 +28,9 @@ const ProjectsPage = ({ courseCode, assignments, isInstructor }) => {
 
   return (
     <div className="projects-page-container">
-      <h1 className="projects-page-title">{courseCode} Projects Page</h1>
+      <h1 className="projects-page-title">{course.code} Projects Page</h1>
 
-      {isInstructor && (
+      {user.isInstructor && (
         <div className="new-project-container">
           {showNewProjectInput && (
             <input
@@ -53,7 +51,7 @@ const ProjectsPage = ({ courseCode, assignments, isInstructor }) => {
       )}
 
       <div className="assignment-list">
-        {assignments.map((assignment, index) => (
+        {course.assignments.map((assignment, index) => (
           <div key={index} className="assignment-item">
             <div className="assignment-details">
               <h2>{assignment.assignmentName}</h2>
@@ -75,7 +73,7 @@ const ProjectsPage = ({ courseCode, assignments, isInstructor }) => {
               >
                 View Submission History
               </button>
-              {isInstructor ? (
+              {user.isInstructor ? (
                 <>
                   <button className="assignment-button">
                     <label>
@@ -120,4 +118,4 @@ const ProjectsPage = ({ courseCode, assignments, isInstructor }) => {
   );
 };
 
-export default ProjectsPage;
+export default CourseProjects;
