@@ -3,7 +3,10 @@ import React, { useEffect, useState } from 'react';
 import Nav from './Nav';
 import { getCourses, useUserSession, logout, enrollUserInCourse, viewUserCourses, removeUserCourse } from './firebase';
 import { useNavigate } from 'react-router-dom';
+import Banner from './Banner'; // Import the Banner component
 import ProjectsPage from "./CourseProjects";
+import CourseNotifications from './CourseNotifications';
+import GroupsPage from './GroupsPage'; // Import the GroupsPage component
 
 function Home() {
   const { user, loading } = useUserSession();
@@ -50,8 +53,20 @@ function Home() {
     }
   ];
 
+  const notifications = [
+    { title: "Notification 1", message: "This is the first notification." },
+    { title: "Notification 2", message: "This is the second notification." },
+  ];
+
+  const groups = [
+    ["Student1", "Student2"],
+    ["Student3", "Student4"],
+    ["Student5", "Student6"],
+  ];
+
   return (
     <div className="Home">
+      <Banner /> {/* Use the Banner component */}
       <Nav />
       <div className="content">
         <h1>
@@ -62,6 +77,8 @@ function Home() {
             ? "Admin"
             : "Instructor"}{" "}
         </h1>
+        <CourseNotifications notifications={notifications} />
+        <GroupsPage groups={groups} />
         <ProjectsPage
           courseCode={"(Instructor pov, for dev purposes) " + courseCode}
           assignments={assignments}
