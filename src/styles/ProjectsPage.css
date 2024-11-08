@@ -31,7 +31,7 @@
   border: none;
   cursor: pointer;
 }
-
+/* 
 .assignment-list {
   display: flex;
   flex-direction: column;
@@ -68,4 +68,88 @@
 
 .assignment-button input[type="file"] {
   display: none;
+} */
+
+.assignment-item {
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
 }
+
+.assignment-parent{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+  padding: 0 1rem 0 1rem;
+}
+
+.assignment-header {
+  display: flex;
+  align-items: left;
+}
+
+.assignment-description {
+  text-align: left;
+  margin-top: 5px;
+  margin-left: 0;
+}
+
+.assignment-item:hover {
+  background-color: #f9f9f9;
+}
+
+.assignment-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.assignment-button {
+  padding: 8px 12px;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.3s ease, transform 0.3s
+}
+
+.assignment-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+  transition: background-color 0.3s ease, transform 0.3s
+}
+
+.assignment-button input[type="file"] {
+  display: none;
+}
+
+.arrow-icon {
+  margin-left: auto;
+  transition: transform 0.3s;
+  display: inline-block;
+  font-size: 20px;
+}
+
+.arrow-icon.open {
+  transform: rotate(90deg);
+}
+
+
+
+
+
+
+

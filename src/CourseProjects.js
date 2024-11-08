@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useUserSession } from "./firebase";
 import "./styles/ProjectsPage.css";
 
@@ -6,6 +6,7 @@ function CourseProjects({ user, course }) {
   const [instructionFile, setInstructionFile] = useState(null);
   const [showNewProjectInput, setShowNewProjectInput] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
+
   const handleFileUpload = (event) => {
     setInstructionFile(event.target.files[0]);
   };
@@ -28,7 +29,7 @@ function CourseProjects({ user, course }) {
 
   return (
     <div className="projects-page-container">
-      <h1 className="projects-page-title">{course.code} Projects Page</h1>
+      <h1 className="projects-page-title"> Projects</h1>
 
       {user.isInstructor && (
         <div className="new-project-container">
@@ -52,68 +53,96 @@ function CourseProjects({ user, course }) {
 
       <div className="assignment-list">
         {course.assignments.map((assignment, index) => (
-          <div key={index} className="assignment-item">
-            <div className="assignment-details">
-              <h2>{assignment.assignmentName}</h2>
-              <p>{assignment.description}</p>
-            </div>
-
-            <div className="assignment-buttons">
-              <button
-                onClick={() =>
-                  window.open(assignment.instructionFiles[0], "_blank")
-                }
-                className="assignment-button"
-              >
-                View Document
-              </button>
-              <button
-                onClick={() => alert("View Submission History")}
-                className="assignment-button"
-              >
-                View Submission History
-              </button>
-              {user.isInstructor ? (
-                <>
-                  <button className="assignment-button">
-                    <label>
-                      Upload Instruction Document
-                      <input type="file" onChange={handleFileUpload} />
-                    </label>
-                  </button>
-                  <button
-                    onClick={() => alert("Submit Evaluation")}
-                    className="assignment-button"
-                  >
-                    Submit Evaluation
-                  </button>
-                  <button
-                    onClick={() => alert("Edit Project")}
-                    className="assignment-button"
-                  >
-                    Edit Project
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="assignment-button">
-                    <label>
-                      Submit Assignment
-                      <input type="file" onChange={handleFileUpload} />
-                    </label>
-                  </button>
-                  <button
-                    onClick={() => alert("View Evaluation")}
-                    className="assignment-button"
-                  >
-                    View Evaluation
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+          <AssignmentItem
+            key={index}
+            assignment={assignment}
+            user={user}
+            handleFileUpload={handleFileUpload}
+          />
         ))}
       </div>
+    </div>
+  );
+}
+
+const AssignmentItem = ({ assignment, user, handleFileUpload }) => {
+  const [showButtons, setShowButtons] = useState(false);
+
+  const toggleButtons = () => {
+    setShowButtons(!showButtons);
+  };
+
+  return (
+    <div className="assignment-item" onClick={toggleButtons}>
+      <div className="assignment-parent">
+        <div className="assignment-left">
+        <h2>{assignment.assignmentName}</h2>
+        <p className="assignment-description">{assignment.description}</p>
+        </div>
+        <div className="assignment-right">
+          <span className={`arrow-icon ${showButtons ? "open" : ""}`}>▶</span>
+        </div>
+      </div>
+      {showButtons && (
+        <div className="assignment-buttons">
+          <button
+              onClick={() => {
+                window.open(
+                  assignment.instructionFiles[0],
+                  "DocumentPopup",
+                  "width=800,height=600,scrollbars=yes,resizable=yes"
+                );
+              }}
+              className="assignment-button"
+            >
+            View Document
+          </button>
+          <button
+            onClick={() => alert("View Submission History")}
+            className="assignment-button"
+          >
+            View Submission History
+          </button>
+
+          {user.isInstructor ? (
+            <>
+              <button className="assignment-button">
+                <label>
+                  Upload Instruction Document
+                  <input type="file" onChange={handleFileUpload} />
+                </label>
+              </button>
+              <button
+                onClick={() => alert("Submit Evaluation")}
+                className="assignment-button"
+              >
+                Submit Evaluation
+              </button>
+              <button
+                onClick={() => alert("Edit Project")}
+                className="assignment-button"
+              >
+                Edit Project
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="assignment-button">
+                <label>
+                  Submit Assignment
+                  <input type="file" onChange={handleFileUpload} />
+                </label>
+              </button>
+              <button
+                onClick={() => alert("View Evaluation")}
+                className="assignment-button"
+              >
+                View Evaluation
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
