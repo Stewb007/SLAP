@@ -1,11 +1,13 @@
 import React from 'react';
 import './styles/CourseNotifications.css';
 
-const CourseNotifications = ({ notifications }) => {
+const CourseNotifications = ({ user, notifications }) => {
   return (
     <div className="CourseNotifications">
       <h1>Course Notifications</h1>
-      <button onClick={() => alert('Create new SLAPs')}>Create new SLAPs</button>
+      {user.isInstructor && (
+              <button onClick={() => alert('Create new SLAPs')}>Create new SLAPs</button>
+      )}
       <div className="notifications-board">
         {notifications.length > 0 ? (
           notifications.map((notification, index) => (
