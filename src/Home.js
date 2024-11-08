@@ -63,12 +63,12 @@ function Home() {
             : "Instructor"}{" "}
         </h1>
         <ProjectsPage
-          courseCode={"(Instructor pov) " + courseCode}
+          courseCode={"(Instructor pov, for dev purposes) " + courseCode}
           assignments={assignments}
           isInstructor={user.isInstructor}
         />
         <ProjectsPage
-          courseCode={"(Student pov) " + courseCode}
+          courseCode={"(Student pov, for dev purposes) " + courseCode}
           assignments={assignments}
           isInstructor={!user.isInstructor}
         />
