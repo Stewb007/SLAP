@@ -49,7 +49,7 @@ function Course() {
     <div className="Course">
     <Nav />
     <div className="content">
-        <h1>{course.name}</h1>
+        <h1>{course.name} ({course.code})</h1>
         <CourseNotifications user={user} notifications={course.notifications} />
         <CourseProjects user={user} course={course} />
     </div>
