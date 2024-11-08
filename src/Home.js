@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Nav from './Nav';
 import { getCourses, useUserSession, logout, enrollUserInCourse, viewUserCourses, removeUserCourse } from './firebase';
 import { useNavigate } from 'react-router-dom';
+import Banner from './Banner'; // Import the Banner component
 import ProjectsPage from "./CourseProjects";
 
 function Home() {
@@ -52,6 +53,7 @@ function Home() {
 
   return (
     <div className="Home">
+      <Banner /> {/* Use the Banner component */}
       <Nav />
       <div className="content">
         <h1>
