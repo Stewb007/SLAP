@@ -3,10 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { useUserSession, useLogout } from './firebase';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRightFromBracket} from '@fortawesome/free-solid-svg-icons'
- 
+ import { useNavigate } from 'react-router-dom';
+
 function Nav() {
     const { user, loading } = useUserSession();
-    const [initials, setInitials] = useState('')
+    const [initials, setInitials] = useState('');
+    const navigate = useNavigate();
     const logout = useLogout();
     useEffect(() => {
         if (!loading) {
@@ -34,7 +36,7 @@ function Nav() {
                 <></>
                 :
                 <div className='right-content'>
-                  <p>Courses</p>
+                  <p onClick={() => navigate('./Courses')}>Courses</p>
                 </div>
             }
             <div className='profile'>
