@@ -1,9 +1,6 @@
 /* Banner.css */
-.banner {
-    background-color: #4CAF50;
+.Banner {
+    background-color: #2f395c;
     color: white;
     text-align: center;
-    padding: 10px 0;
-    font-size: 24px;
-    font-weight: bold;
-  }
+}
