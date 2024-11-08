@@ -2,8 +2,8 @@ import './styles/Admin.css'
 import Nav from './Nav'
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHandPointer, faArrowsRotate, faUserPlus, faUserMinus, faAsterisk, faUserLock } from '@fortawesome/free-solid-svg-icons';
-import { useUserSession, getCourses, getUsers, createUser, deleteUser, updateUser} from './firebase';
+import { faHandPointer, faArrowsRotate, faUserPlus, faUserMinus, faAsterisk, faUserLock, faPlusCircle, faMinusCircle, faTimesCircle} from '@fortawesome/free-solid-svg-icons';
+import { useUserSession, getCourses, getUsers, createUser, deleteUser, updateUser, deleteCourse, enrollUserInCourse, searchUserByEmail, usersInCourse, removeUserCourse} from './firebase';
 
 function Admin() {
     const {user, loading} = useUserSession();
@@ -55,12 +55,92 @@ function Admin() {
 function ManageCourses() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedCourses, setSelectedCourses] = useState([]);
+    const [enrolledUsers, setEnrolledUsers] = useState([]);
+    const [selectedCourse, setSelectedCourse] = useState(null);
+    const [showModal, setShowModal] = useState(false);
     useEffect(() => {
         getCourses().then((courses) => {
             setCourses(courses);
         });
         setLoading(false);
     }, []);
+
+    const handleCheckboxToggle = (courseId) => {
+        if (selectedCourses.includes(courseId)) {
+            setSelectedCourses(selectedCourses.filter(id => id !== courseId));
+        } else {
+            setSelectedCourses([...selectedCourses, courseId]);
+        }
+    }
+    const handleAddCourse = () => {
+        const code = prompt('Enter the course code:');
+        if (!code) return;
+        const name = prompt('Enter the course name:');
+        if (!name) return;
+        const instructor = prompt('Enter the instructor name:');
+        if (!instructor) return;
+        const capacity = prompt('Enter the course capacity:');
+        if (!capacity) return;
+    };
+
+    const handleRemoveCourse = () => {
+        selectedCourses.forEach(course => {
+            deleteCourse(course);
+        });
+        setSelectedCourses([]);
+    };
+
+    const handleEnrollUser = async () => {
+        for (const course of selectedCourses) {
+            const email = prompt('Enter the email of the user to enroll:');
+            if (!email) return;  // Exit if no email is provided
+            
+            try {
+                const user = await searchUserByEmail(email);
+                console.log(user);
+                
+                if (!user) {
+                    alert('User not found.');
+                    return;
+                }
+                
+                await enrollUserInCourse(user.id, course); 
+            } catch (error) {
+                console.error('Error enrolling user:', error);
+                alert('An error occurred while enrolling the user.');
+            }
+        }
+        refreshCourses();
+        setSelectedCourses([]); 
+    };
+
+    const handleRemoveUserCourse = async (id) => {
+        removeUserCourse(id, selectedCourse)
+        const users = await usersInCourse(selectedCourse);
+        refreshCourses();
+        setEnrolledUsers(users);
+    };
+
+    const refreshCourses = async () => {
+        setLoading(true);
+        const courses = await getCourses();
+        setCourses(courses);
+        setLoading(false);
+    };
+    
+    const toggleEnrolled = async (courseCode) => {
+        try {
+            const users = await usersInCourse(courseCode);
+            setEnrolledUsers(users);
+            setSelectedCourse(courseCode);
+            setShowModal(true);
+        } catch (error) {
+            console.error("Failed to retrieve enrolled users:", error);
+            alert("Could not retrieve enrolled users.");
+        }
+    };
+    
 
     if (loading) {
         return (
@@ -73,6 +153,68 @@ function ManageCourses() {
         <div className='manage-courses'>
             <h2>Manage Courses</h2>
             <p>Retrieved {courses.length} {courses.length > 1 ? 'courses' : 'course'}.</p>
+            <div className='database-actions-list'>
+                    <p onClick={selectedCourses.length === 0 ? handleAddCourse : null} 
+                       className={selectedCourses.length === 0 ? '' : 'disabled'}>
+                        <FontAwesomeIcon icon={faPlusCircle} size='lg' title='Add Course'/>
+                    </p>
+                    <p onClick={selectedCourses.length > 0 ? handleRemoveCourse : null} 
+                       className={selectedCourses.length > 0 ? '' : 'disabled'}>
+                        <FontAwesomeIcon icon={faMinusCircle} size='lg' title='Remove User'/>
+                    </p>
+                    <p onClick={selectedCourses.length > 0 ? handleEnrollUser : null} 
+                       className={selectedCourses.length > 0 ? '' : 'disabled'}>
+                        <FontAwesomeIcon icon={faUserPlus} size='lg' title='Enroll User'/>
+                    </p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style={{textAlign:'center'}}>Select</th>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Instructor</th>
+                        <th>Capacity</th>
+                        <th>Enrolled</th>
+                        <th>Assignments</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {courses.map((course, index) => (
+                        <tr key={index}>
+                            <td className='select'>
+                                <input
+                                    type='checkbox'
+                                    checked={selectedCourses.includes(course.code)}
+                                    onChange={() => handleCheckboxToggle(course.code)}
+                                />
+                            </td>
+                            <td>{course.code}</td>
+                            <td>{course.name}</td>
+                            <td style={{color: course.instructor === '' ? 'red' : 'black'}}>{course.instructor === '' ? 'N/A' : course.instructor}</td>
+                            <td>{course.capacity}</td>
+                            <td className='view-users' onClick={() => toggleEnrolled(course.code)}>View Users</td>
+                            <td>{course.assignments.length}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            {showModal && (
+                <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <FontAwesomeIcon icon={faTimesCircle} className="modal-close-icon" onClick={() => setShowModal(false)} />
+                        <h3>Enrolled Users</h3>
+                        <ul className='enrolled-list'>
+                            {enrolledUsers.map((user, index) => (
+                                <li className='enrolled-entry' key={index}>
+                                    <p>{user.name} ({user.email}, {user.isInstructor ? <b>Instructor</b> : <b>Student</b>})</p>
+                                    <button onClick={() => handleRemoveUserCourse(user.id)}>Remove</button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
         </div>
     )
 } 
@@ -232,7 +374,7 @@ function ManageUsers() {
             <table>
                 <thead>
                     <tr>
-                        <th>Select</th>
+                        <th style={{textAlign:'center'}}>Select</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Student Number</th>

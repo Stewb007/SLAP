@@ -1,4 +1,3 @@
-import userEvent from '@testing-library/user-event';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, getDoc, updateDoc, doc, query, where, serverTimestamp, deleteDoc, arrayUnion, arrayRemove} from 'firebase/firestore'
 import { useNavigate } from 'react-router-dom';
@@ -108,6 +107,23 @@ export const updateUser = async (userId, updates) => {
     return 'Error updating user';
   }
 };
+
+/**
+ * Updates a course information in the Firestore database.
+ * 
+ * @param {string} courseId - The ID of the course to be updated.
+ * @param {Object} updates - An object containing the fields to be updated.
+ */
+export const updateCourse = async (courseId, updates) => {
+  try {
+    const courseRef = doc(db, 'courses', courseId);
+    await updateDoc(courseRef, updates);
+    return 'Course updated successfully';
+  } catch (error) {
+    console.error('Error updating course: ', error);
+    return 'Error updating course';
+  }
+}
 
 /**
  * Deletes a user from the Firestore database.
@@ -222,6 +238,23 @@ export const createCourse = async (courseName, courseCode, description, capacity
       console.error('Error creating course: ', error);
     }
 };
+
+/**
+ * Deletes a course from the Firestore database.
+ * 
+ * @param {string} courseId - The ID of the course to be deleted.
+ * @returns {Promise<string>} A message indicating the result of the operation.
+ */
+export const deleteCourse = async (courseId) => {
+    try {
+      const courseRef = doc(db, 'courses', courseId);
+      await deleteDoc(courseRef);
+      return 'Course deleted successfully';
+    } catch (error) {
+      console.error('Error deleting course: ', error);
+      return 'Error deleting course';
+    }
+}
   
 /**
  * Retrieves a list of all users from the Firestore database.
@@ -315,57 +348,104 @@ export const enrollUserInCourse = async (userId, courseCode) => {
       throw new Error('Cannot enroll: course capacity has been reached');
     }
 
-    // Add the courseCode to the user's enrolled array
+    // if user.isInstrucor is true, then we should update the course.instructor field to the user's id
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, {
       enrolled: arrayUnion(courseCode)
     });
-
+    const userSnapshot = await getDoc(userRef);
+    const userData = userSnapshot.data();
+    if (userData.isInstructor) {
+      const courseQuery = query(coursesRef, where('code', '==', courseCode));
+      const courseQueryResult = await getDocs(courseQuery);
+      const courseRef = doc(db, 'courses', courseQueryResult.docs[0].id);
+      const courseData = courseQueryResult.docs[0].data();
+      await updateDoc(courseRef, {
+        instructor: userData.name,
+        capacity: courseData.capacity - 1,
+        enrolled: courseData.enrolled + 1
+      });
+    }
   } catch (error) {
     console.error('Error enrolling user in course: ', error);
     throw error;
   }
 };
+
 /**
- * Returns the list of courses that the user is currently enrolled in
- * @param {string} userId - the ID of the user who wishes to view their courses
- * @returns {Promise<Array<Object>>} - Retrieves a list of all the users courses.
-*/
-export const viewUserCourses = async (userId, courseCode) => {
-  try{
-    const userRef = doc(db, 'users', userId);
-    const userSnapshot = await getDoc(userRef);
-
-    const userData = userSnapshot.data();
-    const enrolledCourses = userData.enrolled || [];
-    console.log(enrolledCourses)
-    return enrolledCourses;
-
-  }catch (error) {
-    console.error('Error retrieving the users courses: ', error);
+ * Returns the list of users currently enrolled in a course
+ * 
+ * @param {string} courseCode - the ID of the course to view the users
+ * @returns {Promise<Array<Object>>} - Retrieves a list of all the users in the course.
+ */
+export const usersInCourse = async (courseCode) => {
+  try {
+    const usersRef = collection(db, 'users');
+    const usersSnapshot = await getDocs(usersRef);
+    const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const courseUsers = users.filter(user => user.enrolled?.includes(courseCode));
+    return courseUsers;
+  } catch (error) {
+    console.error('Error retrieving course users: ', error);
     throw error;
   }
 };
 
 /**
- * Enrolls a user into a course if the capacity allows it.
+ * Returns the list of courses that the user is currently enrolled in
+ * @param {string} courseCode - the ID of the user who wishes to view their courses
+ * @returns {Promise<Array<Object>>} - Retrieves a list of all the user's course details.
+*/
+export const viewUserCourses = async (userId) => {
+  try {
+    const userRef = doc(db, 'users', userId);
+    const userSnapshot = await getDoc(userRef);
+    const userData = userSnapshot.data();
+    const enrolledCourseCodes = userData.enrolled || [];
+
+    // Fetch details of each enrolled course
+    const enrolledCourses = await Promise.all(
+      enrolledCourseCodes.map(async (courseCode) => {
+        const courseRef = doc(db, 'courses', courseCode);  // Assuming courses are stored in a 'courses' collection
+        const courseSnapshot = await getDoc(courseRef);
+        return { id: courseCode, ...courseSnapshot.data() };
+      })
+    );
+
+    return enrolledCourses;
+
+  } catch (error) {
+    console.error('Error retrieving the user\'s courses: ', error);
+    throw error;
+  }
+};
+
+
+/**
+ * Removes a user from a course.
  * @param {string} userId - the ID of the user who wishes to drop out of the class
  * @param {string} courseCode - the ID of the coruse the users wants to drop 
  * @returns {Promise<void>} - remove the user
 */
-
 export const removeUserCourse = async (userId,courseCode) => {
   try{
     const userRef = doc(db, 'users', userId);
-    
-    const enrolledCourses = await viewUserCourses(userId);
-
-    if (!enrolledCourses.includes(courseCode)) {
-      throw new Error('Cannot remove: course is not in course list');
-    }
     await updateDoc(userRef, {
       enrolled: arrayRemove(courseCode)
     });
+    const userSnapshot = await getDoc(userRef);
+    const userData = userSnapshot.data();
+    if (userData.isInstructor) {
+      const courseQuery = query(collection(db, 'courses'), where('code', '==', courseCode));
+      const courseQueryResult = await getDocs(courseQuery);
+      const courseRef = doc(db, 'courses', courseQueryResult.docs[0].id);
+      const courseData = courseQueryResult.docs[0].data();
+      await updateDoc(courseRef, {
+        instructor: '',
+        capacity: courseData.capacity + 1,
+        enrolled: courseData.enrolled - 1,
+      });
+    }
 
   }catch(error) {
     console.error('Error retrieving the users courses: ', error);
