@@ -1,22 +1,17 @@
 import React, { useState } from "react";
-import { useUserSession } from "./firebase";
+// import { db } from "./firebase";
+// import { collection } from "firebase/firestore";
+
 import "./styles/ProjectsPage.css";
 
 function CourseProjects({ user, course }) {
-  const [instructionFile, setInstructionFile] = useState(null);
   const [showNewProjectInput, setShowNewProjectInput] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
 
-  const handleFileUpload = (event) => {
-    setInstructionFile(event.target.files[0]);
-  };
-
-  // Handle new project button click to toggle input box
   const handleNewProjectClick = () => {
     setShowNewProjectInput((prev) => !prev);
   };
 
-  // Handle submit new project
   const handleSubmit = () => {
     if (newProjectName.trim()) {
       alert(`New project submitted: ${newProjectName}`);
@@ -53,31 +48,38 @@ function CourseProjects({ user, course }) {
 
       <div className="assignment-list">
         {course.assignments.map((assignment, index) => (
-          <AssignmentItem
-            key={index}
-            assignment={assignment}
-            user={user}
-            handleFileUpload={handleFileUpload}
-          />
+          <AssignmentItem key={index} assignment={assignment} user={user} />
         ))}
       </div>
     </div>
   );
 }
 
-const AssignmentItem = ({ assignment, user, handleFileUpload }) => {
+const AssignmentItem = ({ assignment, user }) => {
   const [showButtons, setShowButtons] = useState(false);
 
+  
   const toggleButtons = () => {
     setShowButtons(!showButtons);
+  };
+
+  const handleUploadInstructionDocument = (event, assignmentName) => {
+    console.log(1);
+  };
+
+  const handleUploadAssignment = (event, assignmentName) => {
+    const file = event.target.files[0];
+    if (file) {
+      alert(`Assignment for ${assignmentName} submitted: ${file.name}`);
+    }
   };
 
   return (
     <div className="assignment-item" onClick={toggleButtons}>
       <div className="assignment-parent">
         <div className="assignment-left">
-        <h2>{assignment.assignmentName}</h2>
-        <p className="assignment-description">{assignment.description}</p>
+          <h2>{assignment.assignmentName}</h2>
+          <p className="assignment-description">{assignment.description}</p>
         </div>
         <div className="assignment-right">
           <span className={`arrow-icon ${showButtons ? "open" : ""}`}>▶</span>
@@ -86,15 +88,18 @@ const AssignmentItem = ({ assignment, user, handleFileUpload }) => {
       {showButtons && (
         <div className="assignment-buttons">
           <button
-              onClick={() => {
-                window.open(
-                  assignment.instructionFiles[0],
-                  "DocumentPopup",
-                  "width=800,height=600,scrollbars=yes,resizable=yes"
-                );
-              }}
-              className="assignment-button"
-            >
+            onClick={() => {
+              const newWindow = window.open(
+                "",
+                "DocumentPopup",
+                "width=800,height=600,scrollbars=yes,resizable=yes"
+              );
+              newWindow.document.write(
+                "<pre>" + assignment.instructionFile + "</pre>"
+              );
+            }}
+            className="assignment-button"
+          >
             View Document
           </button>
           <button
@@ -109,7 +114,16 @@ const AssignmentItem = ({ assignment, user, handleFileUpload }) => {
               <button className="assignment-button">
                 <label>
                   Upload Instruction Document
-                  <input type="file" onChange={handleFileUpload} />
+                  <input
+                    type="file"
+                    accept=".txt"
+                    onChange={(e) =>
+                      handleUploadInstructionDocument(
+                        e,
+                        assignment.assignmentName
+                      )
+                    }
+                  />
                 </label>
               </button>
               <button
@@ -130,7 +144,12 @@ const AssignmentItem = ({ assignment, user, handleFileUpload }) => {
               <button className="assignment-button">
                 <label>
                   Submit Assignment
-                  <input type="file" onChange={handleFileUpload} />
+                  <input
+                    type="file"
+                    onChange={(e) =>
+                      handleUploadAssignment(e, assignment.assignmentName)
+                    }
+                  />
                 </label>
               </button>
               <button

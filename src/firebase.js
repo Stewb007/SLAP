@@ -537,10 +537,9 @@ export const updateSLAP = async (slapId, updates) => {
  * @param {string} courseCode - The code of the course the assignment belongs to.
  * @param {string} assignmentName - The name of the assignment.
  * @param {string} description - The description of the assignment.
- * @param {string} fileURL - The URL of the instruction file for the assignment.
  * @param {Array<Array<string>>} group - An array containing an array of student IDS in the group.
  */
-export const createAssignment = async (courseCode, assignmentName, description, fileURL, groups) => {
+export const createAssignment = async (courseCode, assignmentName, description, groups) => {
   try {
     const courseQuery = query(collection(db, 'courses'), where('code', '==', courseCode));
     const courseQueryResult = await getDocs(courseQuery);
@@ -554,7 +553,7 @@ export const createAssignment = async (courseCode, assignmentName, description, 
     const newAssignment = {
       assignmentName,
       description,
-      instructionFiles: [fileURL],
+      instructionFile: "",
       groups: mappedGroups,
       studentsNotInGroup: [],
     };
