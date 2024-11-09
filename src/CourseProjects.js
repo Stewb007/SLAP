@@ -1,10 +1,15 @@
 import React, { useState } from "react";
-// import { db } from "./firebase";
-// import { collection } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
 
-import "./styles/ProjectsPage.css";
+import "./styles/CourseProjects.css";
 
-function CourseProjects({ user, course }) {
+const CourseProjects = ({ user, course }) => {
   const [showNewProjectInput, setShowNewProjectInput] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
 
@@ -53,18 +58,88 @@ function CourseProjects({ user, course }) {
       </div>
     </div>
   );
-}
+};
 
 const AssignmentItem = ({ assignment, user }) => {
   const [showButtons, setShowButtons] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState(assignment.assignmentName);
+  const [editedDescription, setEditedDescription] = useState(
+    assignment.description
+  );
 
-  
-  const toggleButtons = () => {
+  const toggleButtonsVisibility = () => {
     setShowButtons(!showButtons);
   };
 
-  const handleUploadInstructionDocument = (event, assignmentName) => {
-    console.log(1);
+  const handleViewDocument = async (assignmentName) => {
+    const db = getFirestore();
+    const coursesRef = collection(db, "courses");
+    const snapshot = await getDocs(coursesRef);
+
+    for (const docSnapshot of snapshot.docs) {
+      const courseData = docSnapshot.data();
+      const assignments = courseData.assignments;
+
+      const assignmentData = assignments.find(
+        (a) => a.assignmentName === assignmentName
+      );
+
+      if (assignmentData) {
+        const newWindow = window.open(
+          "",
+          "DocumentPopup",
+          "width=800,height=600,scrollbars=yes,resizable=yes"
+        );
+
+        newWindow.document.write(
+          "<pre>" + assignmentData.instructionFile + "</pre>"
+        );
+      }
+    }
+  };
+
+  const handleUploadInstructionDocument = async (event, assignmentName) => {
+    const file = event.target.files[0];
+
+    if (!file || file.type !== "text/plain") return;
+
+    const reader = new FileReader();
+
+    const readFile = new Promise((resolve, reject) => {
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
+    reader.readAsText(file);
+
+    const instructionContent = await readFile;
+
+    const db = getFirestore();
+    const coursesRef = collection(db, "courses");
+    const snapshot = await getDocs(coursesRef);
+
+    for (const docSnapshot of snapshot.docs) {
+      const courseData = docSnapshot.data();
+      const assignments = courseData.assignments;
+
+      const assignment = assignments.find(
+        (assignment) => assignment.assignmentName === assignmentName
+      );
+
+      if (assignment) {
+        const docRef = doc(db, "courses", docSnapshot.id);
+        await updateDoc(docRef, {
+          assignments: assignments.map((a) =>
+            a.assignmentName === assignmentName
+              ? { ...a, instructionFile: instructionContent }
+              : a
+          ),
+        });
+      }
+    }
+
+    window.location.reload();
   };
 
   const handleUploadAssignment = (event, assignmentName) => {
@@ -74,8 +149,44 @@ const AssignmentItem = ({ assignment, user }) => {
     }
   };
 
+  const handleEditClick = (e) => {
+    e.stopPropagation();
+    setIsEditing(true);
+  };
+
+  const handleSaveClick = async (e) => {
+    e.stopPropagation();
+    const db = getFirestore();
+    const coursesRef = collection(db, "courses");
+    const snapshot = await getDocs(coursesRef);
+
+    for (const docSnapshot of snapshot.docs) {
+      const courseData = docSnapshot.data();
+      const assignments = courseData.assignments;
+
+      const updatedAssignments = assignments.map((a) =>
+        a.assignmentName === assignment.assignmentName
+          ? { ...a, assignmentName: editedName, description: editedDescription }
+          : a
+      );
+
+      const docRef = doc(db, "courses", docSnapshot.id);
+      await updateDoc(docRef, { assignments: updatedAssignments });
+    }
+
+    setIsEditing(false);
+    window.location.reload();
+  };
+
+  const handleCancelClick = (e) => {
+    e.stopPropagation();
+    setIsEditing(false);
+    setEditedName(assignment.assignmentName);
+    setEditedDescription(assignment.description);
+  };
+
   return (
-    <div className="assignment-item" onClick={toggleButtons}>
+    <div className="assignment-item" onClick={toggleButtonsVisibility}>
       <div className="assignment-parent">
         <div className="assignment-left">
           <h2>{assignment.assignmentName}</h2>
@@ -88,22 +199,19 @@ const AssignmentItem = ({ assignment, user }) => {
       {showButtons && (
         <div className="assignment-buttons">
           <button
-            onClick={() => {
-              const newWindow = window.open(
-                "",
-                "DocumentPopup",
-                "width=800,height=600,scrollbars=yes,resizable=yes"
-              );
-              newWindow.document.write(
-                "<pre>" + assignment.instructionFile + "</pre>"
-              );
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewDocument(assignment.assignmentName);
             }}
             className="assignment-button"
           >
             View Document
           </button>
           <button
-            onClick={() => alert("View Submission History")}
+            onClick={(e) => {
+              e.stopPropagation();
+              alert("View Submission History");
+            }}
             className="assignment-button"
           >
             View Submission History
@@ -111,31 +219,36 @@ const AssignmentItem = ({ assignment, user }) => {
 
           {user.isInstructor ? (
             <>
-              <button className="assignment-button">
+              <button
+                className="assignment-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
                 <label>
                   Upload Instruction Document
                   <input
                     type="file"
                     accept=".txt"
-                    onChange={(e) =>
+                    onChange={(e) => {
                       handleUploadInstructionDocument(
                         e,
                         assignment.assignmentName
-                      )
-                    }
+                      );
+                    }}
                   />
                 </label>
               </button>
               <button
-                onClick={() => alert("Submit Evaluation")}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  alert("Submit Evaluation");
+                }}
                 className="assignment-button"
               >
                 Submit Evaluation
               </button>
-              <button
-                onClick={() => alert("Edit Project")}
-                className="assignment-button"
-              >
+              <button onClick={handleEditClick} className="assignment-button">
                 Edit Project
               </button>
             </>
@@ -146,20 +259,48 @@ const AssignmentItem = ({ assignment, user }) => {
                   Submit Assignment
                   <input
                     type="file"
-                    onChange={(e) =>
-                      handleUploadAssignment(e, assignment.assignmentName)
-                    }
+                    onChange={(e) => {
+                      handleUploadAssignment(e, assignment.assignmentName);
+                    }}
                   />
                 </label>
               </button>
               <button
-                onClick={() => alert("View Evaluation")}
+                onClick={(e) => alert("View Evaluation")}
                 className="assignment-button"
               >
                 View Evaluation
               </button>
             </>
           )}
+        </div>
+      )}
+      {isEditing && (
+        <div
+          className="edit-panel"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <input
+            type="text"
+            value={editedName}
+            onChange={(e) => setEditedName(e.target.value)}
+            placeholder="Edit Assignment Name"
+          />
+          <textarea
+            value={editedDescription}
+            onChange={(e) => setEditedDescription(e.target.value)}
+            placeholder="Edit Description"
+          />
+          <div className="edit-panel-buttons">
+            <button onClick={handleSaveClick} className="edit-button">
+              Save
+            </button>
+            <button onClick={handleCancelClick} className="edit-button">
+              Cancel
+            </button>
+          </div>
         </div>
       )}
     </div>

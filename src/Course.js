@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useUserSession, getCourses } from "./firebase";
-import "./styles/ProjectsPage.css";
+import "./styles/CourseProjects.css";
 import { useParams } from "react-router-dom";
 import Nav from "./Nav";
 import CourseProjects from "./CourseProjects";
