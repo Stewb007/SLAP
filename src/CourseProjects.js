@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   getFirestore,
@@ -7,7 +7,6 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
-import { fetchAllStudentNames } from "./firebase";
 import InstructorSubmissionHistory from "./InstructorSubmissionHistory";
 import "./styles/CourseProjects.css";
 
@@ -192,7 +191,7 @@ const AssignmentItem = ({ assignment, user, course }) => {
     setEditedDescription(assignment.description);
   };
 
-  const handleViewSubmissionHistory = () => {
+  const handleViewInstructorSideSubmissionHistory = () => {
     const newWindow = window.open(
       "",
       "SubmissionHistoryPopup",
@@ -235,18 +234,18 @@ const AssignmentItem = ({ assignment, user, course }) => {
           >
             View Document
           </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewSubmissionHistory();
-            }}
-            className="assignment-button"
-          >
-            View Submission History
-          </button>
 
           {user.isInstructor ? (
             <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleViewInstructorSideSubmissionHistory();
+                }}
+                className="assignment-button"
+              >
+                View Submission History
+              </button>
               <button
                 className="assignment-button"
                 onClick={(e) => {
@@ -282,6 +281,14 @@ const AssignmentItem = ({ assignment, user, course }) => {
             </>
           ) : (
             <>
+              <button
+                onClick={(e) => {
+                  alert("Check submission");
+                }}
+                className="assignment-button"
+              >
+                Check submission
+              </button>
               <button className="assignment-button">
                 <label>
                   Submit Assignment
