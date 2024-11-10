@@ -655,7 +655,7 @@ export const fetchAllStudentNames = async ({
   studentsNotInGroup,
 }) => {
   const studentIdNameMap = {};
-  
+
   const fetchAndMapName = async (studentId) => {
     if (!(studentId in studentIdNameMap)) {
       const name = await getUserNameByStudentId(studentId);
@@ -674,4 +674,33 @@ export const fetchAllStudentNames = async ({
   }
 
   return studentIdNameMap;
+};
+
+export const fetchSubmissions = async ({
+  assignmentId,
+  courseCode,
+  studentId,
+}) => {
+  const q = query(
+    collection(db, "submissions"),
+    where("studentId", "==", studentId)
+  );
+
+  try {
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      console.log("No submissions found for this student.");
+      return null;
+    }
+
+    const studentDoc = snapshot.docs[0].data();
+    const studentSubmissions = studentDoc.submissions;
+    const submissionKey = `${courseCode}-${assignmentId}`;
+
+    return studentSubmissions[submissionKey];
+  } catch (error) {
+    console.error("Error fetching submissions:", error);
+    return null;
+  }
 };
