@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createRoot } from "react-dom/client";
 import {
   getFirestore,
   collection,
@@ -6,7 +7,8 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
-
+import { fetchAllStudentNames } from "./firebase";
+import InstructorSubmissionHistory from "./InstructorSubmissionHistory";
 import "./styles/CourseProjects.css";
 
 const CourseProjects = ({ user, course }) => {
@@ -53,14 +55,19 @@ const CourseProjects = ({ user, course }) => {
 
       <div className="assignment-list">
         {course.assignments.map((assignment, index) => (
-          <AssignmentItem key={index} assignment={assignment} user={user} />
+          <AssignmentItem
+            key={index}
+            assignment={assignment}
+            user={user}
+            course={course}
+          />
         ))}
       </div>
     </div>
   );
 };
 
-const AssignmentItem = ({ assignment, user }) => {
+const AssignmentItem = ({ assignment, user, course }) => {
   const [showButtons, setShowButtons] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(assignment.assignmentName);
@@ -185,6 +192,27 @@ const AssignmentItem = ({ assignment, user }) => {
     setEditedDescription(assignment.description);
   };
 
+  const handleViewSubmissionHistory = () => {
+    const newWindow = window.open(
+      "",
+      "SubmissionHistoryPopup",
+      "width=800,height=1200,scrollbars=yes,resizable=yes"
+    );
+
+    newWindow.document.write('<div id="root"></div>');
+    newWindow.document.close();
+    newWindow.onload = () => {
+      const container = newWindow.document.getElementById("root");
+      const root = createRoot(container);
+      root.render(
+        <InstructorSubmissionHistory
+          assignment={assignment}
+          courseCode={course.code}
+        />
+      );
+    };
+  };
+
   return (
     <div className="assignment-item" onClick={toggleButtonsVisibility}>
       <div className="assignment-parent">
@@ -210,7 +238,7 @@ const AssignmentItem = ({ assignment, user }) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              alert("View Submission History");
+              handleViewSubmissionHistory();
             }}
             className="assignment-button"
           >
