@@ -1,46 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { fetchAllStudentNames, fetchSubmissions } from "./firebase";
-
-const styles = {
-  container: {
-    padding: "20px",
-    backgroundColor: "white",
-    borderRadius: "8px",
-    margin: "20px",
-  },
-  header: {
-    fontSize: "24px",
-    color: "#333",
-    textAlign: "center",
-  },
-  groupContainer: {
-    marginTop: "20px",
-    padding: "10px",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
-  },
-  groupHeader: {
-    fontSize: "20px",
-    fontWeight: "bold",
-    marginBottom: "10px",
-  },
-  groupMembersList: {
-    listStyleType: "none",
-    padding: "0",
-  },
-  groupMemberItem: {
-    padding: "5px",
-    borderBottom: "1px solid #ddd",
-  },
-  studentList: {
-    listStyleType: "none",
-    padding: "0",
-  },
-  studentListItem: {
-    padding: "5px",
-    borderBottom: "1px solid #ddd",
-  },
-};
+import styles from "./styles/SubmissionAndEvaluation";
 
 const InstructorSubmissionHistory = ({ assignment, courseCode }) => {
   const [studentNumbersToNamesMap, setStudentNumbersToNamesMap] = useState({});
@@ -255,9 +215,5 @@ const InstructorSubmissionHistory = ({ assignment, courseCode }) => {
     </div>
   );
 };
-
-
-
-
 
 export default InstructorSubmissionHistory;

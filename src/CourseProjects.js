@@ -8,6 +8,7 @@ import {
   doc,
 } from "firebase/firestore";
 import InstructorSubmissionHistory from "./InstructorSubmissionHistory";
+import InstructorEvaluations from "./InstructorEvaluations";
 import "./styles/CourseProjects.css";
 
 const CourseProjects = ({ user, course }) => {
@@ -191,7 +192,7 @@ const AssignmentItem = ({ assignment, user, course }) => {
     setEditedDescription(assignment.description);
   };
 
-  const handleViewInstructorSideSubmissionHistory = () => {
+  const handleViewInstructorSubmissionHistory = () => {
     const newWindow = window.open(
       "",
       "SubmissionHistoryPopup",
@@ -212,6 +213,26 @@ const AssignmentItem = ({ assignment, user, course }) => {
     };
   };
 
+  const handleViewInstructorEvaluations = () => { 
+    const newWindow = window.open(
+      "",
+      "SubmissionHistoryPopup",
+      "width=800,height=1200,scrollbars=yes,resizable=yes"
+    );
+
+    newWindow.document.write('<div id="root"></div>');
+    newWindow.document.close();
+    newWindow.onload = () => {
+      const container = newWindow.document.getElementById("root");
+      const root = createRoot(container);
+      root.render(
+        <InstructorEvaluations
+          assignment={assignment}
+          courseCode={course.code}
+        />
+      );
+    };
+  }
   return (
     <div className="assignment-item" onClick={toggleButtonsVisibility}>
       <div className="assignment-parent">
@@ -240,7 +261,7 @@ const AssignmentItem = ({ assignment, user, course }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleViewInstructorSideSubmissionHistory();
+                  handleViewInstructorSubmissionHistory();
                 }}
                 className="assignment-button"
               >
@@ -269,7 +290,7 @@ const AssignmentItem = ({ assignment, user, course }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  alert("Submit Evaluation");
+                  handleViewInstructorEvaluations();
                 }}
                 className="assignment-button"
               >

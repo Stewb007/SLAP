@@ -704,3 +704,42 @@ export const fetchSubmissions = async ({
     return null;
   }
 };
+
+export const evaluateStudent = async ({
+  studentId,
+  assignmentId,
+  courseCode,
+  mark,
+}) => {
+  const q = query(
+    collection(db, "submissions"),
+    where("studentId", "==", studentId)
+  );
+
+  try {
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      console.log("No submissions found for this student.");
+      return null;
+    }
+
+    const studentDoc = snapshot.docs[0];
+    const submissionRef = doc(db, "submissions", studentDoc.id); // Get the reference to the specific document
+
+    const studentEvaluations = studentDoc.data().evaluations || {}; // Ensure evaluations exists
+    const key = `${courseCode}-${assignmentId}`;
+
+    studentEvaluations[key] = mark;
+
+    await updateDoc(submissionRef, {
+      evaluations: studentEvaluations,
+    });
+
+    console.log(
+      `Successfully updated evaluation for student ${studentId} for ${key} with mark: ${mark}`
+    );
+  } catch (error) {
+    console.error("Error fetching or updating submission:", error);
+  }
+};
