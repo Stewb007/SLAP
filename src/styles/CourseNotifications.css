@@ -10,17 +10,29 @@
   margin-bottom: 20px;
 }
 
-.CourseNotifications button {
+.create-notification {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.create-notification input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.create-notification button {
   background-color: #007bff;
   color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
-  margin-bottom: 20px;
 }
 
-.CourseNotifications button:hover {
+.create-notification button:hover {
   background-color: #0056b3;
 }
 
@@ -45,4 +57,18 @@
 .notification p {
   font-size: 14px;
   color: #555;
+}
+
+.delete-button {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.delete-button:hover {
+  background-color: #ff1a1a;
 }

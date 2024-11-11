@@ -743,3 +743,46 @@ export const evaluateStudent = async ({
     console.error("Error fetching or updating submission:", error);
   }
 };
+
+
+/**
+ * Adds a notification to the notifications array in a specific course document.
+ *
+ * @param {string} courseId - The ID of the course document.
+ * @param {Object} notification - The notification object containing title and message.
+ * @returns {Promise<void>} A promise that resolves when the notification is added.
+ */
+export const addCourseNotification = async (courseId, notification) => {
+  try {
+    const courseRef = doc(db, 'courses', courseId);
+    await updateDoc(courseRef, {
+      notifications: arrayUnion({
+        ...notification,
+        createdAt: new Date(), // or use `serverTimestamp()` if desired
+      }),
+    });
+  } catch (error) {
+    console.error('Error adding notification:', error);
+    throw error;
+  }
+};
+
+
+/**
+ * Removes a specific notification from the notifications array in a course document.
+ *
+ * @param {string} courseId - The ID of the course document.
+ * @param {Object} notification - The exact notification object to remove.
+ * @returns {Promise<void>} A promise that resolves when the notification is removed.
+ */
+export const removeCourseNotification = async (courseId, notification) => {
+  try {
+    const courseRef = doc(db, 'courses', courseId);
+    await updateDoc(courseRef, {
+      notifications: arrayRemove(notification),
+    });
+  } catch (error) {
+    console.error('Error removing notification:', error);
+    throw error;
+  }
+};
