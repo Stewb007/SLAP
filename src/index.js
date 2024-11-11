@@ -5,6 +5,8 @@ import './index.css';
 import Home from './Home';
 import Submissions from './Submissions';
 import SubmissionsPage from './SubmissionsPage';
+import Courses from'./Courses'
+import CourseProjects from './CourseProjects';
 import Auth from './Auth';
 import Admin from './Admin';
 import reportWebVitals from './reportWebVitals';
@@ -21,6 +23,24 @@ root.render(
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+
+      <Route
+          path="/Courses"
+          element={
+            <ProtectedRoute>
+              <Courses />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/CourseProjects"
+          element={
+            <ProtectedRoute>
+              <CourseProjects />
             </ProtectedRoute>
           }
         />
