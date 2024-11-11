@@ -10,11 +10,20 @@ import {
 import { createAssignment } from "./firebase";
 import InstructorSubmissionHistory from "./InstructorSubmissionHistory";
 import InstructorEvaluations from "./InstructorEvaluations";
+import GroupsPage from "./GroupsPage"; // Import GroupsPage component
 import "./styles/CourseProjects.css";
 
 const CourseProjects = ({ user, course }) => {
   const [showNewProjectInput, setShowNewProjectInput] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
+  const [groups, setGroups] = useState([]);
+  const [students] = useState([
+    "Student1",
+    "Student2",
+    "Student3",
+    "Student4",
+    "Student5",
+  ]); // Example student list
 
   const handleNewProjectClick = () => {
     setShowNewProjectInput((prev) => !prev);
@@ -35,6 +44,10 @@ const CourseProjects = ({ user, course }) => {
     } else {
       alert("Please enter a project name.");
     }
+  };
+
+  const addGroup = (newGroup) => {
+    setGroups([...groups, newGroup]);
   };
 
   return (
@@ -68,6 +81,9 @@ const CourseProjects = ({ user, course }) => {
             assignment={assignment}
             user={user}
             course={course}
+            groups={groups}
+            students={students}
+            addGroup={addGroup}
           />
         ))}
       </div>
@@ -75,7 +91,7 @@ const CourseProjects = ({ user, course }) => {
   );
 };
 
-const AssignmentItem = ({ assignment, user, course }) => {
+const AssignmentItem = ({ assignment, user, course, groups, students, addGroup }) => {
   const [showButtons, setShowButtons] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(assignment.assignmentName);
@@ -241,6 +257,7 @@ const AssignmentItem = ({ assignment, user, course }) => {
       );
     };
   };
+
   return (
     <div className="assignment-item" onClick={toggleButtonsVisibility}>
       <div className="assignment-parent">
@@ -307,6 +324,7 @@ const AssignmentItem = ({ assignment, user, course }) => {
               <button onClick={handleEditClick} className="assignment-button">
                 Edit Project
               </button>
+              <GroupsPage groups={groups} students={students} addGroup={addGroup} /> {/* Add GroupsPage component */}
             </>
           ) : (
             <>

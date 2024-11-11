@@ -34,7 +34,7 @@ const InstructorSubmissionHistory = ({ assignment, courseCode }) => {
         setStudentIdsToSubmissionsMap(studentIdsToSubmissionsMap);
       });
     });
-  }, [assignment]);
+  }, [assignment, courseCode]);
 
   const existingGroupCount = assignment.mappedGroups
     ? Object.keys(assignment.mappedGroups).length
