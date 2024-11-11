@@ -794,3 +794,74 @@ export const removeCourseNotification = async (courseId, notification) => {
     throw error;
   }
 };
+
+/**
+ * Adds a new group to an assignment in the Firestore database.
+ *
+ * @param {string} courseId - The ID of the course.
+ * @param {string} assignmentId - The ID of the assignment.
+ * @param {Object} group - The group object containing name and members.
+ * @returns {Promise<void>} A promise that resolves when the group is added.
+ */
+export const addGroupToAssignment = async (courseId, assignmentId, group) => {
+  try {
+    const courseRef = doc(db, 'courses', courseId);
+    const courseDoc = await getDoc(courseRef);
+    if (!courseDoc.exists()) {
+      throw new Error('Course not found');
+    }
+
+    const courseData = courseDoc.data();
+    const assignments = courseData.assignments.map((assignment) => {
+      if (assignment.assignmentId === assignmentId) {
+        return {
+          ...assignment,
+          mappedGroups: [...assignment.mappedGroups, group.members],
+          studentsNotInGroup: assignment.studentsNotInGroup.filter(
+            (studentId) => !group.members.includes(studentId)
+          ),
+        };
+      }
+      return assignment;
+    });
+
+    await updateDoc(courseRef, { assignments });
+  } catch (error) {
+    console.error('Error adding group to assignment:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches the groups for a specific assignment from the Firestore database.
+ *
+ * @param {string} courseId - The ID of the course.
+ * @param {string} assignmentId - The ID of the assignment.
+ * @returns {Promise<Object>} A promise that resolves to the groups data.
+ */
+export const fetchGroupsForAssignment = async (courseId, assignmentId) => {
+  try {
+    const courseRef = doc(db, 'courses', courseId);
+    const courseDoc = await getDoc(courseRef);
+    if (!courseDoc.exists()) {
+      throw new Error('Course not found');
+    }
+
+    const courseData = courseDoc.data();
+    const assignment = courseData.assignments.find(
+      (assignment) => assignment.assignmentId === assignmentId
+    );
+
+    if (!assignment) {
+      throw new Error('Assignment not found');
+    }
+
+    return {
+      mappedGroups: assignment.mappedGroups,
+      studentsNotInGroup: assignment.studentsNotInGroup,
+    };
+  } catch (error) {
+    console.error('Error fetching groups for assignment:', error);
+    throw error;
+  }
+};

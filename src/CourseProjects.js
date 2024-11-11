@@ -324,7 +324,6 @@ const AssignmentItem = ({ assignment, user, course, groups, students, addGroup }
               <button onClick={handleEditClick} className="assignment-button">
                 Edit Project
               </button>
-              <GroupsPage groups={groups} students={students} addGroup={addGroup} /> {/* Add GroupsPage component */}
             </>
           ) : (
             <>
@@ -356,6 +355,14 @@ const AssignmentItem = ({ assignment, user, course, groups, students, addGroup }
             </>
           )}
         </div>
+      )}
+      {showButtons && (
+        <GroupsPage
+          courseId={course.id}
+          assignmentId={assignment.assignmentId}
+          students={students}
+          addGroup={addGroup}
+        />
       )}
       {isEditing && (
         <div
