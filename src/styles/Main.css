@@ -38,7 +38,7 @@
   flex-direction: column;
 }
 
-.content, .Nav {
+.content, .Nav, .Banner {
   display: flex;
   padding: 1rem clamp(1rem, 15vw, 20rem); /* min 1rem, max 20rem, scales with 10vw */
 }

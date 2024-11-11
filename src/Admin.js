@@ -2,8 +2,8 @@ import './styles/Admin.css'
 import Nav from './Nav'
 import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHandPointer, faArrowsRotate, faUserPlus, faUserMinus, faAsterisk, faUserLock } from '@fortawesome/free-solid-svg-icons';
-import { useUserSession, getCourses, getUsers, createUser, deleteUser, updateUser} from './firebase';
+import { faHandPointer, faArrowsRotate, faUserPlus, faUserMinus, faAsterisk, faUserLock, faPlusCircle, faMinusCircle, faTimesCircle, faEyeSlash, faEye} from '@fortawesome/free-solid-svg-icons';
+import { useUserSession, getCourses, getUsers, createUser, deleteUser, updateUser, deleteCourse, enrollUserInCourse, searchUserByEmail, usersInCourse, removeUserCourse, getSLAPS, createSLAP, updateSLAP, createCourse} from './firebase';
 
 function Admin() {
     const {user, loading} = useUserSession();
@@ -55,12 +55,95 @@ function Admin() {
 function ManageCourses() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedCourses, setSelectedCourses] = useState([]);
+    const [enrolledUsers, setEnrolledUsers] = useState([]);
+    const [selectedCourse, setSelectedCourse] = useState(null);
+    const [showModal, setShowModal] = useState(false);
     useEffect(() => {
         getCourses().then((courses) => {
             setCourses(courses);
         });
         setLoading(false);
     }, []);
+
+    const handleCheckboxToggle = (courseId) => {
+        if (selectedCourses.includes(courseId)) {
+            setSelectedCourses(selectedCourses.filter(id => id !== courseId));
+        } else {
+            setSelectedCourses([...selectedCourses, courseId]);
+        }
+    }
+    const handleAddCourse = () => {
+        const code = prompt('Enter the course code:');
+        if (!code) return;
+        const name = prompt('Enter the course name:');
+        if (!name) return;
+        const capacity = prompt('Enter the course capacity:');
+        if (!capacity) return;
+        const description = prompt('Enter the course description:');
+        if (!description) return;
+        createCourse(name, code, description, capacity);
+        refreshCourses();
+    };
+
+    const handleRemoveCourse = () => {
+        selectedCourses.forEach(course => {
+            deleteCourse(course);
+        });
+        refreshCourses();
+        setSelectedCourses([]);
+    };
+
+    const handleEnrollUser = async () => {
+        for (const course of selectedCourses) {
+            const email = prompt('Enter the email of the user to enroll:');
+            if (!email) return;  // Exit if no email is provided
+            
+            try {
+                const user = await searchUserByEmail(email);
+                console.log(user);
+                
+                if (!user) {
+                    alert('User not found.');
+                    return;
+                }
+                
+                await enrollUserInCourse(user.id, course); 
+            } catch (error) {
+                console.error('Error enrolling user:', error);
+                alert('An error occurred while enrolling the user.');
+            }
+        }
+        refreshCourses();
+        setSelectedCourses([]); 
+    };
+
+    const handleRemoveUserCourse = async (id) => {
+        removeUserCourse(id, selectedCourse)
+        const users = await usersInCourse(selectedCourse);
+        refreshCourses();
+        setEnrolledUsers(users);
+    };
+
+    const refreshCourses = async () => {
+        setLoading(true);
+        const courses = await getCourses();
+        setCourses(courses);
+        setLoading(false);
+    };
+    
+    const toggleEnrolled = async (courseCode) => {
+        try {
+            const users = await usersInCourse(courseCode);
+            setEnrolledUsers(users);
+            setSelectedCourse(courseCode);
+            setShowModal(true);
+        } catch (error) {
+            console.error("Failed to retrieve enrolled users:", error);
+            alert("Could not retrieve enrolled users.");
+        }
+    };
+    
 
     if (loading) {
         return (
@@ -73,6 +156,74 @@ function ManageCourses() {
         <div className='manage-courses'>
             <h2>Manage Courses</h2>
             <p>Retrieved {courses.length} {courses.length > 1 ? 'courses' : 'course'}.</p>
+            <div className='database-actions-list'>
+                    <p onClick={selectedCourses.length === 0 ? handleAddCourse : null} 
+                       className={selectedCourses.length === 0 ? '' : 'disabled'}>
+                        <FontAwesomeIcon icon={faPlusCircle} size='lg' title='Add Course'/>
+                    </p>
+                    <p onClick={selectedCourses.length > 0 ? handleRemoveCourse : null} 
+                       className={selectedCourses.length > 0 ? '' : 'disabled'}>
+                        <FontAwesomeIcon icon={faMinusCircle} size='lg' title='Remove Course'/>
+                    </p>
+                    <p onClick={selectedCourses.length > 0 ? handleEnrollUser : null} 
+                       className={selectedCourses.length > 0 ? '' : 'disabled'}>
+                        <FontAwesomeIcon icon={faUserPlus} size='lg' title='Enroll User'/>
+                    </p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style={{textAlign:'center'}}>Select</th>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Instructor</th>
+                        <th>Capacity</th>
+                        <th>Enrolled</th>
+                        <th>Assignments</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {courses.map((course, index) => (
+                        <>
+                        <tr key={index}>
+                            <td className='select' rowSpan={2}>
+                                <input
+                                    type='checkbox'
+                                    checked={selectedCourses.includes(course.code)}
+                                    onChange={() => handleCheckboxToggle(course.code)}
+                                />
+                            </td>
+                            <td>{course.code}</td>
+                            <td>{course.name}</td>
+                            <td style={{color: course.instructor === '' ? 'red' : 'black'}}>{course.instructor === '' ? 'N/A' : course.instructor}</td>
+                            <td>{course.capacity}</td>
+                            <td className='view-users' onClick={() => toggleEnrolled(course.code)}>View Users</td>
+                            <td>{course.assignments.length}</td>
+                        </tr>
+                        <tr>
+                            <td colSpan='7' className='course-description'><b>Description:</b> {course.description}</td>
+                        </tr>
+                        </>
+                    ))}
+                </tbody>
+            </table>
+            {showModal && (
+                <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <FontAwesomeIcon icon={faTimesCircle} className="modal-close-icon" onClick={() => setShowModal(false)} />
+                        <h3>Enrolled Users</h3>
+                        <ul className='enrolled-list'>
+                            {enrolledUsers.length === 0 && <p>No users enrolled in this course.</p>}
+                            {enrolledUsers.map((user, index) => (
+                                <li className='enrolled-entry' key={index}>
+                                    <p>{user.name} ({user.email}, {user.isInstructor ? <b>Instructor</b> : <b>Student</b>})</p>
+                                    <button onClick={() => handleRemoveUserCourse(user.id)}>Remove</button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
         </div>
     )
 } 
@@ -156,7 +307,23 @@ function ManageUsers() {
             if (isInstructor === 'yes' || isInstructor === 'no') break;
             alert('Please ensure you enter either Yes or No.');
         }
-        createUser(name, email, student_number, year, program, isAdmin === 'yes', isInstructor === 'yes');
+        createUser(
+          name,
+          email,
+          email,
+          student_number,
+          year,
+          program,
+          isAdmin === "yes",
+          isInstructor === "yes"
+        )
+          .then(() => {
+            window.location.reload();
+          })
+          .catch((error) => {
+            console.error("Error creating user:", error);
+            alert("Failed to create user.");
+          });
     };
 
     const handleRemoveUsers = () => {
@@ -232,7 +399,7 @@ function ManageUsers() {
             <table>
                 <thead>
                     <tr>
-                        <th>Select</th>
+                        <th style={{textAlign:'center'}}>Select</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Student Number</th>
@@ -272,9 +439,108 @@ function ManageUsers() {
 }
 
 function SystemNotifications() {
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedNotifications, setSelectedNotifications] = useState([]);
+    useEffect(() => {
+        getSLAPS().then((slaps) => {
+            setNotifications(slaps);
+        });
+        setLoading(false);
+    }, []);
+
+    const handleSLAPCreate = () => {
+        const content = prompt('Enter the content of the notification:');
+        if (!content) return;
+        createSLAP(content, 'SYS', false);
+        refreshSLAPS();
+    };
+
+    const handleSLAPDisable = () => {
+        selectedNotifications.forEach(notification => {
+            updateSLAP(notification, { isActive: false });
+        });
+        refreshSLAPS();
+    };
+
+    const handleSLAPEnable = () => {
+        const activeNotification = notifications.find(notification => notification.isActive);
+        if (activeNotification) {
+            updateSLAP(activeNotification.id, { isActive: false });
+        }
+        selectedNotifications.forEach(notification => {
+            updateSLAP(notification, { isActive: true });
+        });
+        refreshSLAPS();
+    };
+
+    const handleCheckboxToggle = (notificationId) => {
+        if (selectedNotifications.includes(notificationId)) {
+            setSelectedNotifications(selectedNotifications.filter(id => id !== notificationId));
+        } else {
+            setSelectedNotifications([...selectedNotifications, notificationId]);
+        }
+    }
+
+    const refreshSLAPS = async () => {
+        setLoading(true);
+        const slaps = await getSLAPS();
+        setNotifications(slaps);
+        setLoading(false);
+    };
+
+    if (loading) {
+        return (
+            <div className='fetching-admin'>
+                <FontAwesomeIcon icon={faArrowsRotate} spin/>
+            </div>
+        )
+    }
+
     return (
         <div className='sys-notif'>
             <h2>System Notifications</h2>
+            <p>Retrieved {notifications.length} {notifications.length === 1 ? 'notification' : 'notifications'}. <br/><i>Only one System Wide notification can be active at <b>once</b>.</i></p>
+            <div className='database-actions-list'>
+                <p onClick={selectedNotifications.length === 0 ? handleSLAPCreate : null} 
+                       className={selectedNotifications.length === 0 ? '' : 'disabled'}>
+                    <FontAwesomeIcon icon={faPlusCircle} size='lg' title='Create Notification'/>
+                </p>
+                <p onClick={selectedNotifications.length === 1 ? handleSLAPDisable : null} 
+                       className={selectedNotifications.length === 1 ? '' : 'disabled'}>
+                        <FontAwesomeIcon icon={faEyeSlash} size='lg' title='Disable SLAP'/>
+                </p>
+                <p onClick={selectedNotifications.length === 1 ? handleSLAPEnable : null}
+                          className={selectedNotifications.length === 1 ? '' : 'disabled'}>
+                            <FontAwesomeIcon icon={faEye} size='lg' title='Enable SLAP'/>
+                </p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style={{textAlign:'center'}}>Select</th>
+                        <th>Content</th>
+                        <th>Is Active</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {notifications.map((notification, index) => (
+                        <tr key={index}>
+                            <td className='select'>
+                                <input
+                                    type='checkbox'
+                                    checked={selectedNotifications.includes(notification.id)}
+                                    onChange={() => handleCheckboxToggle(notification.id)}
+                                />
+                            </td>
+                            <td>{notification.content}</td>
+                            <td>{notification.isActive ? 'Yes' : 'No'}</td>
+                            <td>{notification.type === 'SYS' ? 'System Wide' : <span><b>Course:</b> notification.type</span>}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     )
 }

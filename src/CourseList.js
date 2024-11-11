@@ -5,7 +5,7 @@ import Nav from './Nav';
 import { viewUserCourses, useUserSession } from './firebase';
 
 
-function Courses() {
+function CourseList() {
     const { user, loading } = useUserSession();
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const navigate = useNavigate();
@@ -19,8 +19,8 @@ function Courses() {
         }
     }, [loading, user]);
 
-    const handleCourseClick = (course) => {
-        navigate('/CourseProjects')
+    const handleCourseClick = (courseCode) => {
+        navigate(`/Course/${courseCode}`);
     };
 
     if (loading) {
@@ -37,8 +37,8 @@ function Courses() {
                     <ul>
                         {enrolledCourses.map((course, index) => (
                             <li key={index}>
-                                <button onClick={() => handleCourseClick(course)}>
-                                    {course}
+                                <button onClick={() => handleCourseClick(course.code)}>
+                                    {course.code}
                                 </button>
                             </li>
                         ))}
@@ -51,4 +51,4 @@ function Courses() {
     );
 }
 
-export default Courses;
+export default CourseList;
