@@ -7,6 +7,7 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
+import { createAssignment } from "./firebase";
 import InstructorSubmissionHistory from "./InstructorSubmissionHistory";
 import InstructorEvaluations from "./InstructorEvaluations";
 import "./styles/CourseProjects.css";
@@ -19,11 +20,18 @@ const CourseProjects = ({ user, course }) => {
     setShowNewProjectInput((prev) => !prev);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (newProjectName.trim()) {
-      alert(`New project submitted: ${newProjectName}`);
-      setNewProjectName("");
-      setShowNewProjectInput(false);
+      try {
+        await createAssignment(course.code, newProjectName);
+
+        alert(`New project submitted: ${newProjectName}`);
+        setNewProjectName("");
+        setShowNewProjectInput(false);
+        window.location.reload();
+      } catch (error) {
+        console.error("Error creating assignment:", error);
+      }
     } else {
       alert("Please enter a project name.");
     }
@@ -213,7 +221,7 @@ const AssignmentItem = ({ assignment, user, course }) => {
     };
   };
 
-  const handleViewInstructorEvaluations = () => { 
+  const handleViewInstructorEvaluations = () => {
     const newWindow = window.open(
       "",
       "SubmissionHistoryPopup",
@@ -232,7 +240,7 @@ const AssignmentItem = ({ assignment, user, course }) => {
         />
       );
     };
-  }
+  };
   return (
     <div className="assignment-item" onClick={toggleButtonsVisibility}>
       <div className="assignment-parent">

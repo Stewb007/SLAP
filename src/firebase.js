@@ -593,14 +593,10 @@ export const updateSLAP = async (slapId, updates) => {
  *
  * @param {string} courseCode - The code of the course the assignment belongs to.
  * @param {string} assignmentName - The name of the assignment.
- * @param {string} description - The description of the assignment.
- * @param {Array<Array<string>>} group - An array containing an array of student IDS in the group.
  */
 export const createAssignment = async (
   courseCode,
   assignmentName,
-  description,
-  groups
 ) => {
   try {
     const courseQuery = query(
@@ -611,17 +607,29 @@ export const createAssignment = async (
     const courseRef = doc(db, "courses", courseQueryResult.docs[0].id);
     const courseData = courseQueryResult.docs[0].data();
     const assignments = courseData.assignments || [];
-    const mappedGroups = groups.reduce((acc, group, index) => {
-      acc[`group${index + 1}`] = group;
-      return acc;
-    }, {});
+
+    const assignmentId = (assignments.length + 1).toString();
+
     const newAssignment = {
+      assignmentId,
       assignmentName,
-      description,
-      instructionFile: "",
-      groups: mappedGroups,
+      description: "Add your description here by editing the project.",
+      instructionFile: "No instruction file submitted yet",
+      mappedGroups: {},
       studentsNotInGroup: [],
     };
+
+    const usersQuery = query(collection(db, "users"));
+    const usersQueryResult = await getDocs(usersQuery);
+
+    usersQueryResult.forEach((userDoc) => {
+      const userData = userDoc.data();
+      const enrolledCourses = userData.enrolled || [];
+      if (enrolledCourses.includes(courseCode) && userData.isAdmin === false && userData.isInstructor === false) {
+        newAssignment.studentsNotInGroup.push(userData.student_number);
+      }
+    });
+
     assignments.push(newAssignment);
     await updateDoc(courseRef, { assignments });
   } catch (error) {
