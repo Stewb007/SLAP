@@ -72,6 +72,7 @@ input[type="password"]:hover {
     color: rgb(70, 149, 175);
     text-decoration: underline;
     cursor: pointer;
+    display: None;
 }
 
 .sign-in {
