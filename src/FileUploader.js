@@ -60,25 +60,6 @@ const FileUploader = ({ assignmentName, courseCode, studentId, assignmentId }) =
         }
   };
 
-    //     const newSubmission = {
-    //         submissionDate: new Date(),
-    //         submissionFile: fileContent,
-    //     };
-
-    //     await updateDoc(docRef, {
-    //         [`submissions.${assignmentName}`]: arrayUnion(newSubmission),
-    //     });
-
-    //     setSubmissionMessage("File submitted successfully!");
-    //     setFileContent("");
-    //     } catch (error) {
-    //     console.error("Error adding new submission:", error);
-    //     setSubmissionMessage("Failed to submit file. Please try again.");
-    //     } finally {
-    //     setIsSubmitting(false);
-    //     }
-    // };
-
   return (
     <div>
       <h1>Please Select a file to upload for {assignmentName}</h1>
