@@ -270,99 +270,101 @@ const AssignmentItem = ({ assignment, user, course, groups, students, addGroup }
         </div>
       </div>
       {showButtons && (
-        <div className="assignment-buttons">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewDocument(assignment.assignmentName);
-            }}
-            className="assignment-button"
-          >
-            View Document
-          </button>
+        <>
+          <div className="assignment-buttons">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewDocument(assignment.assignmentName);
+              }}
+              className="assignment-button"
+            >
+              View Document
+            </button>
 
-          {user.isInstructor ? (
-            <>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleViewInstructorSubmissionHistory();
-                }}
-                className="assignment-button"
-              >
-                View Submission History
-              </button>
-              <button
-                className="assignment-button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-              >
-                <label>
-                  Upload Instruction Document
-                  <input
-                    type="file"
-                    accept=".txt"
-                    onChange={(e) => {
-                      handleUploadInstructionDocument(
-                        e,
-                        assignment.assignmentName
-                      );
-                    }}
-                  />
-                </label>
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleViewInstructorEvaluations();
-                }}
-                className="assignment-button"
-              >
-                Submit Evaluation
-              </button>
-              <button onClick={handleEditClick} className="assignment-button">
-                Edit Project
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={(e) => {
-                  alert("Check submission");
-                }}
-                className="assignment-button"
-              >
-                Check submission
-              </button>
-              <button className="assignment-button">
-                <label>
-                  Submit Assignment
-                  <input
-                    type="file"
-                    onChange={(e) => {
-                      handleUploadAssignment(e, assignment.assignmentName);
-                    }}
-                  />
-                </label>
-              </button>
-              <button
-                onClick={(e) => alert("View Evaluation")}
-                className="assignment-button"
-              >
-                View Evaluation
-              </button>
-            </>
+            {user.isInstructor ? (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewInstructorSubmissionHistory();
+                  }}
+                  className="assignment-button"
+                >
+                  View Submission History
+                </button>
+                <button
+                  className="assignment-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <label>
+                    Upload Instruction Document
+                    <input
+                      type="file"
+                      accept=".txt"
+                      onChange={(e) => {
+                        handleUploadInstructionDocument(
+                          e,
+                          assignment.assignmentName
+                        );
+                      }}
+                    />
+                  </label>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewInstructorEvaluations();
+                  }}
+                  className="assignment-button"
+                >
+                  Submit Evaluation
+                </button>
+                <button onClick={handleEditClick} className="assignment-button">
+                  Edit Project
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={(e) => {
+                    alert("Check submission");
+                  }}
+                  className="assignment-button"
+                >
+                  Check submission
+                </button>
+                <button className="assignment-button">
+                  <label>
+                    Submit Assignment
+                    <input
+                      type="file"
+                      onChange={(e) => {
+                        handleUploadAssignment(e, assignment.assignmentName);
+                      }}
+                    />
+                  </label>
+                </button>
+                <button
+                  onClick={(e) => alert("View Evaluation")}
+                  className="assignment-button"
+                >
+                  View Evaluation
+                </button>
+              </>
+            )}
+          </div>
+          {user.isInstructor && (
+            <GroupsPage
+              user={user}
+              courseId={course.id}
+              assignmentId={assignment.assignmentId}
+              students={students}
+            />
           )}
-        </div>
-      )}
-      {showButtons && (
-        <GroupsPage
-          courseId={course.id}
-          assignmentId={assignment.assignmentId}
-          students={students}
-          addGroup={addGroup}
-        />
+        </>
       )}
       {isEditing && (
         <div

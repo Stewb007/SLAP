@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import './styles/GroupsPage.css';
-import { addGroupToAssignment, fetchGroupsForAssignment } from './firebase'; // Import the functions
+import { addGroupToAssignment, fetchGroupsForAssignment, fetchAllStudentNames } from './firebase'; // Import the functions
 
-const GroupsPage = ({ courseId, assignmentId, students }) => {
-  const [newGroupName, setNewGroupName] = useState('');
-  const [selectedStudents, setSelectedStudents] = useState([]);
+const GroupsPage = ({ user, courseId, assignmentId, students }) => {
   const [groups, setGroups] = useState([]);
   const [studentsNotInGroup, setStudentsNotInGroup] = useState(students);
+  const [studentNamesMap, setStudentNamesMap] = useState({});
 
   useEffect(() => {
     const fetchGroups = async () => {
       try {
         const { mappedGroups, studentsNotInGroup } = await fetchGroupsForAssignment(courseId, assignmentId);
+        const studentNames = await fetchAllStudentNames({ mappedGroups, studentsNotInGroup });
         setGroups(Object.entries(mappedGroups));
         setStudentsNotInGroup(studentsNotInGroup);
+        setStudentNamesMap(studentNames);
       } catch (error) {
         console.error('Error fetching groups:', error);
       }
@@ -23,51 +24,26 @@ const GroupsPage = ({ courseId, assignmentId, students }) => {
   }, [courseId, assignmentId]);
 
   const handleCreateGroup = async () => {
-    if (newGroupName.trim() && selectedStudents.length > 0) {
-      const newGroup = { name: newGroupName, members: selectedStudents };
+    if (studentsNotInGroup.length > 0) {
+      const newGroup = { name: `Group ${groups.length + 1}`, members: studentsNotInGroup };
       try {
         await addGroupToAssignment(courseId, assignmentId, newGroup);
-        setGroups([...groups, [newGroupName, selectedStudents]]);
-        setStudentsNotInGroup(studentsNotInGroup.filter(student => !selectedStudents.includes(student)));
-        setNewGroupName('');
-        setSelectedStudents([]);
+        setGroups([...groups, [newGroup.name, studentsNotInGroup]]);
+        setStudentsNotInGroup([]);
       } catch (error) {
         console.error('Error creating group:', error);
       }
     }
   };
 
-  const handleStudentSelection = (student) => {
-    setSelectedStudents((prevSelected) =>
-      prevSelected.includes(student)
-        ? prevSelected.filter((s) => s !== student)
-        : [...prevSelected, student]
-    );
-  };
+  if (!user.isInstructor) {
+    return null;
+  }
 
   return (
     <div className="GroupsPage">
       <h1>Groups</h1>
       <div className="create-group">
-        <input
-          type="text"
-          value={newGroupName}
-          onChange={(e) => setNewGroupName(e.target.value)}
-          placeholder="Enter group name"
-        />
-        <div className="student-selection">
-          {studentsNotInGroup.map((student, index) => (
-            <div key={index}>
-              <input
-                type="checkbox"
-                id={`student-${index}`}
-                checked={selectedStudents.includes(student)}
-                onChange={() => handleStudentSelection(student)}
-              />
-              <label htmlFor={`student-${index}`}>{student}</label>
-            </div>
-          ))}
-        </div>
         <button onClick={handleCreateGroup}>Create a Group</button>
       </div>
       <div className="groups-list">
@@ -77,7 +53,7 @@ const GroupsPage = ({ courseId, assignmentId, students }) => {
               <h2>{groupName}</h2>
               <ul>
                 {groupMembers.map((student, idx) => (
-                  <li key={idx}>{student}</li>
+                  <li key={idx}>{studentNamesMap[student] || student}</li>
                 ))}
               </ul>
               <button onClick={() => alert(`View Activity for ${groupName}`)}>View Activity</button>
@@ -91,7 +67,7 @@ const GroupsPage = ({ courseId, assignmentId, students }) => {
         <h2>Students Not in Any Group</h2>
         <ul>
           {studentsNotInGroup.map((student, index) => (
-            <li key={index}>{student}</li>
+            <li key={index}>{studentNamesMap[student] || student}</li>
           ))}
         </ul>
       </div>

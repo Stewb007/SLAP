@@ -3,6 +3,7 @@
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px; /* Add margin to separate from projects section */
 }
 
 .GroupsPage h1 {
@@ -15,18 +16,6 @@
   flex-direction: column;
   gap: 10px;
   margin-bottom: 20px;
-}
-
-.create-group input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.student-selection {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
 }
 
 .create-group button {
