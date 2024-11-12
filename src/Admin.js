@@ -12,9 +12,36 @@ function Admin() {
 
     if(loading) {
         return (
-          <div className="Home">
-            <p>Fetching...</p>
-         </div>
+        <div className="Admin">
+            <Nav />
+            <div className='content'>
+                <h1 className='loading'></h1>
+                <p className='loading' style={{width: '350px'}}></p>
+                <div className='action-table'>
+                    <div className='actions'>
+                        <p onClick={() => setAction('System Notifications')}>System Notifications</p>
+                        <p onClick={() => setAction('Manage Courses')}>Manage Courses</p>
+                        <p onClick={() => setAction('Manage Users')}>Manage Users</p>
+                    </div>
+                    <div className='action-content'>
+                    {selectedAction === '' ?
+                        <div className='select-action'>
+                            <FontAwesomeIcon icon={faHandPointer} size='2xl' />
+                            <h3>No Action Selected</h3>
+                            <p>Please select an action to begin performing operations.</p>
+                        </div>
+                        : selectedAction === 'Manage Courses' ?
+                            <ManageCourses />
+                            : selectedAction === 'Manage Users' ?
+                                <ManageUsers />
+                                : selectedAction === 'System Notifications' ?
+                                    <SystemNotifications />
+                                    : <></>
+                    }
+                    </div>
+                </div>
+            </div>
+        </div>
         )
     }
 
@@ -189,8 +216,8 @@ function ManageCourses() {
                             <td className='select' rowSpan={2}>
                                 <input
                                     type='checkbox'
-                                    checked={selectedCourses.includes(course.code)}
-                                    onChange={() => handleCheckboxToggle(course.code)}
+                                    checked={selectedCourses.includes(course.id)}
+                                    onChange={() => handleCheckboxToggle(course.id)}
                                 />
                             </td>
                             <td>{course.code}</td>
@@ -315,6 +342,7 @@ function ManageUsers() {
             deleteUser(user);
         });
         setSelectedUsers([]);
+        window.location.reload();
     };
 
     const handleRequestPasswordReset = () => {
