@@ -689,6 +689,9 @@ export const fetchSubmissions = async ({
   courseCode,
   studentId,
 }) => {
+
+  console.log(assignmentId)
+  console.log(courseCode,studentId)
   const q = query(
     collection(db, "submissions"),
     where("studentId", "==", studentId)
@@ -865,3 +868,41 @@ export const fetchGroupsForAssignment = async (courseId, assignmentId) => {
     throw error;
   }
 };
+
+/**
+ * Fetches the grade of a user in the firebase
+ *
+ * @param {string} studentId - The ID of the student.
+ * @param {string} courseId - The ID of the course.
+ * @param {string} assignmentId - The ID of the assignment.
+ * @returns {Promise<Object>} - the grade of the student
+ */
+
+export const fetchStudentGrade = async ({ assignmentId, courseCode, studentId }) => {
+  const gradeRef = query(
+    collection(db, "submissions"),
+    where("studentId", "==", studentId)
+  );
+
+  try {
+    const gradeSnapshot = await getDocs(gradeRef);
+
+    if (gradeSnapshot.empty) {
+      throw new Error('student grade not found');
+    }
+    const studentDoc = gradeSnapshot.docs[0];
+    const studentEvaluations = studentDoc.data().evaluations || {};
+    const key = `${courseCode}-${assignmentId}`;
+
+    const grade = studentEvaluations[key];
+    if (grade !== undefined) {
+      return grade;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching grade:", error);
+    throw error
+  }
+};
+
