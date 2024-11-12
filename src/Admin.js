@@ -353,12 +353,16 @@ function ManageUsers() {
           });
     };
 
-    const handleRemoveUsers = () => {
-        selectedUsers.forEach(user => {
-            deleteUser(user);
-        });
-        setSelectedUsers([]);
-        window.location.reload();
+    const handleRemoveUsers = async () => {
+        const deletePromises = selectedUsers.map(user => deleteUser(user));
+    
+        try {
+            await Promise.all(deletePromises);
+            setSelectedUsers([]);
+            window.location.reload();
+        } catch (error) {
+            console.error("Error deleting users:", error);
+        }
     };
 
     const handleRequestPasswordReset = () => {
