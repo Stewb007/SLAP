@@ -7,11 +7,15 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
-import { createAssignment } from "./firebase";
+import { createAssignment, fetchSubmissions, fetchStudentGrade  } from "./firebase";
 import InstructorSubmissionHistory from "./InstructorSubmissionHistory";
+import StudentSubmissionHistory from "./StudentSubmissionHistory";
 import InstructorEvaluations from "./InstructorEvaluations";
+import StudentViewGrade from "./StudentViewGrade";
 import GroupsPage from "./GroupsPage"; // Import GroupsPage component
+import FileUploader from "./FileUploader"
 import "./styles/CourseProjects.css";
+
 
 const CourseProjects = ({ user, course }) => {
   const [showNewProjectInput, setShowNewProjectInput] = useState(false);
@@ -49,6 +53,7 @@ const CourseProjects = ({ user, course }) => {
   const addGroup = (newGroup) => {
     setGroups([...groups, newGroup]);
   };
+
 
   return (
     <div className="projects-page-container">
@@ -129,7 +134,106 @@ const AssignmentItem = ({ assignment, user, course, groups, students, addGroup }
       }
     }
   };
+  // const handlefetchUserSubmissionsForAssignment = (assignmentId, courseCode ,studentId) => {
+  //   fetchSubmissions({assignmentId, courseCode,studentId}).then((result) => {
+  //     console.log(result)
+  //   })
+  // };
 
+  const handlefetchUserSubmissionsForAssignment = (assignmentId, courseCode, studentId) => {
+    fetchSubmissions({assignmentId, courseCode, studentId}).then((result) => {
+      const newWindow = window.open(
+        "",
+        "SubmissionHistoryPopup",
+        "width=800,height=1200,scrollbars=yes,resizable=yes"
+      );
+  
+      newWindow.document.write('<div id="root"></div>');
+      newWindow.document.close();
+      setTimeout(() => {
+        const container = newWindow.document.getElementById("root");
+        if (container) {
+          const root = createRoot(container);
+          root.render(
+            <StudentSubmissionHistory
+              result={result}           
+              courseCode={courseCode}       
+              assignmentId={assignmentId}
+              studentId={studentId}
+          />
+          );
+        } else {
+          console.error("Container not found.");
+        }
+      }, 100);
+    })
+  };
+
+  // const handlefetchUserGrade = (assignmentId, courseCode, studentId) => {
+  //   fetchStudentGrade({assignmentId, courseCode, studentId}).then((result) => {
+  //     console.log(result)
+  //   })
+  // };
+  const handleUploadAssignment = (event, assignmentName, courseCode, studentId, assignmentId) => {
+    const newWindow = window.open(
+      "",
+      "SubmissionHistoryPopup",
+      "width=800,height=1200,scrollbars=yes,resizable=yes"
+    );
+
+    newWindow.document.write('<div id="root"></div>');
+    newWindow.document.close();
+    setTimeout(() => {
+      const container = newWindow.document.getElementById("root");
+      if (container) {
+        const root = createRoot(container);
+        root.render(
+          <FileUploader
+          assignmentName={assignmentName}
+          courseCode={courseCode}
+          studentId={studentId}
+          assignmentId={assignment.assignmentId}
+        />
+        );
+      } else {
+        console.error("Container not found.");
+      }
+    }, 100);
+  };
+
+
+
+  const handlefetchUserGrade = (assignmentId, courseCode, studentId) => {
+    fetchStudentGrade({assignmentId, courseCode, studentId}).then((result) => {
+      const newWindow = window.open(
+        "",
+        "SubmissionHistoryPopup",
+        "width=800,height=500,scrollbars=yes,resizable=yes"
+      );
+  
+      newWindow.document.write('<div id="root"></div>');
+      newWindow.document.close();
+      setTimeout(() => {
+        const container = newWindow.document.getElementById("root");
+        if (container) {
+          const root = createRoot(container);
+          root.render(
+            <StudentViewGrade
+              result={result}           
+              courseCode={courseCode}       
+              assignmentId={assignmentId}
+              studentId={studentId}
+          />
+          );
+        } else {
+          console.error("Container not found.");
+        }
+      }, 100);
+    })
+  };
+  
+  
+  
   const handleUploadInstructionDocument = async (event, assignmentName) => {
     const file = event.target.files[0];
 
@@ -171,13 +275,6 @@ const AssignmentItem = ({ assignment, user, course, groups, students, addGroup }
     }
 
     window.location.reload();
-  };
-
-  const handleUploadAssignment = (event, assignmentName) => {
-    const file = event.target.files[0];
-    if (file) {
-      alert(`Assignment for ${assignmentName} submitted: ${file.name}`);
-    }
   };
 
   const handleEditClick = (e) => {
@@ -265,6 +362,7 @@ const AssignmentItem = ({ assignment, user, course, groups, students, addGroup }
     }, 100);
   };
 
+
   return (
     <div className="assignment-item" onClick={toggleButtonsVisibility}>
       <div className="assignment-parent">
@@ -337,25 +435,27 @@ const AssignmentItem = ({ assignment, user, course, groups, students, addGroup }
               <>
                 <button
                   onClick={(e) => {
-                    alert("Check submission");
+                    e.stopPropagation();
+                    handlefetchUserSubmissionsForAssignment(assignment.assignmentId,course.code,user.student_number);
                   }}
                   className="assignment-button"
                 >
                   Check submission
                 </button>
-                <button className="assignment-button">
+                <button className="assignment-button" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUploadAssignment(e,assignment.assignmentName,course.code,user.student_number);
+                }}>
                   <label>
                     Submit Assignment
-                    <input
-                      type="file"
-                      onChange={(e) => {
-                        handleUploadAssignment(e, assignment.assignmentName);
-                      }}
-                    />
                   </label>
                 </button>
                 <button
-                  onClick={(e) => alert("View Evaluation")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlefetchUserGrade(assignment.assignmentId,course.code,user.student_number,assignment.assignmentId)
+                  }}
                   className="assignment-button"
                 >
                   View Evaluation

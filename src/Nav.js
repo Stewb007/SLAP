@@ -41,7 +41,7 @@ function Nav() {
                   <></>
                   :
                   <div className='right-content'>
-                    <p onClick={() => navigate('/Courses')}>Courses</p>
+                    <p onClick={() => navigate('/Courses')}>View Courses</p>
                   </div>
               }
               <div className='profile'>
