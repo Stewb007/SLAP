@@ -1,0 +1,173 @@
+.projects-page-container {
+  font-family: Arial, sans-serif;
+}
+
+.projects-page-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.new-project-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.new-project-input {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  flex: 1;
+}
+
+.new-project-button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.new-project-button:hover {
+  background-color: #45a049;
+}
+
+.assignment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.assignment-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.assignment-item:hover {
+  background-color: #f9f9f9;
+}
+
+.assignment-parent {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+  padding: 0 1rem 0 1rem;
+}
+
+.assignment-header {
+  display: flex;
+  align-items: left;
+}
+
+.assignment-description {
+  text-align: left;
+  margin-top: 5px;
+  margin-left: 0;
+}
+
+.assignment-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+.assignment-button {
+  padding: 8px 12px;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.3s ease, transform 0.3s;
+}
+
+.assignment-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.assignment-button input[type="file"] {
+  display: none;
+}
+
+.arrow-icon {
+  margin-left: auto;
+  transition: transform 0.3s;
+  display: inline-block;
+  font-size: 20px;
+}
+
+.arrow-icon.open {
+  transform: rotate(90deg);
+}
+
+.edit-panel {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  margin: 10px 0;
+}
+
+.edit-panel input,
+.edit-panel textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.edit-panel textarea {
+  height: 100px;
+}
+
+.edit-panel-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.edit-button {
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.edit-button:hover {
+  background-color: #45a049;
+}
+
+.edit-button:active {
+  background-color: #388e3c;
+}
+
+.edit-panel input:focus,
+.edit-panel textarea:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
+}

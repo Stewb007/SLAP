@@ -334,7 +334,23 @@ function ManageUsers() {
             if (isInstructor === 'yes' || isInstructor === 'no') break;
             alert('Please ensure you enter either Yes or No.');
         }
-        createUser(name, email, student_number, year, program, isAdmin === 'yes', isInstructor === 'yes');
+        createUser(
+          name,
+          email,
+          email,
+          student_number,
+          year,
+          program,
+          isAdmin === "yes",
+          isInstructor === "yes"
+        )
+          .then(() => {
+            window.location.reload();
+          })
+          .catch((error) => {
+            console.error("Error creating user:", error);
+            alert("Failed to create user.");
+          });
     };
 
     const handleRemoveUsers = () => {
