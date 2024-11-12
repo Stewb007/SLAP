@@ -1,3 +1,26 @@
+.loading {
+  width: 200px;
+  height: 20px;
+  margin: 1rem;
+  background: linear-gradient(
+      90deg,
+      #797979 25%,
+      #aaaaaa 50%,
+      #797979 75%
+  ); /* Dark gray to light gray to dark gray */
+  background-size: 200% 100%;
+  animation: sweep 1.5s linear infinite;
+}
+  
+@keyframes sweep {
+  0% {
+  background-position: 200% 0;
+  }
+  100% {
+  background-position: -200% 0;
+  }
+}
+
 .login-redirection, .login-redirection-desc {
     margin: 0;
     text-align: center;

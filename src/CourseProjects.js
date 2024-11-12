@@ -225,16 +225,20 @@ const AssignmentItem = ({ assignment, user, course, groups, students, addGroup }
 
     newWindow.document.write('<div id="root"></div>');
     newWindow.document.close();
-    newWindow.onload = () => {
+    setTimeout(() => {
       const container = newWindow.document.getElementById("root");
-      const root = createRoot(container);
-      root.render(
-        <InstructorSubmissionHistory
-          assignment={assignment}
-          courseCode={course.code}
-        />
-      );
-    };
+      if (container) {
+        const root = createRoot(container);
+        root.render(
+          <InstructorSubmissionHistory
+            assignment={assignment}
+            courseCode={course.code}
+          />
+        );
+      } else {
+        console.error("Container not found.");
+      }
+    }, 100);
   };
 
   const handleViewInstructorEvaluations = () => {
@@ -243,19 +247,22 @@ const AssignmentItem = ({ assignment, user, course, groups, students, addGroup }
       "SubmissionHistoryPopup",
       "width=800,height=1200,scrollbars=yes,resizable=yes"
     );
-
-    newWindow.document.write('<div id="root"></div>');
+    newWindow.document.write('<div id="root"><InstructorEvaluations assignment={assignment}courseCode={course.code}/></div>');
     newWindow.document.close();
-    newWindow.onload = () => {
+    setTimeout(() => {
       const container = newWindow.document.getElementById("root");
-      const root = createRoot(container);
-      root.render(
-        <InstructorEvaluations
-          assignment={assignment}
-          courseCode={course.code}
-        />
-      );
-    };
+      if (container) {
+        const root = createRoot(container);
+        root.render(
+          <InstructorEvaluations
+            assignment={assignment}
+            courseCode={course.code}
+          />
+        );
+      } else {
+        console.error("Container not found.");
+      }
+    }, 100);
   };
 
   return (
