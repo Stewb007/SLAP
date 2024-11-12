@@ -3,6 +3,7 @@
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px; /* Add margin to separate from projects section */
 }
 
 .GroupsPage h1 {
@@ -10,17 +11,24 @@
   margin-bottom: 20px;
 }
 
-.GroupsPage button {
+.create-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.create-group button {
   background-color: #007bff;
   color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
-  margin-bottom: 20px;
+  align-self: flex-start; /* Align button to the start */
 }
 
-.GroupsPage button:hover {
+.create-group button:hover {
   background-color: #0056b3;
 }
 
@@ -60,8 +68,28 @@
   border-radius: 4px;
   cursor: pointer;
   margin-top: 10px;
+  align-self: flex-start; /* Align button to the start */
 }
 
 .group button:hover {
   background-color: #218838;
+}
+
+.students-not-in-group {
+  margin-top: 20px;
+}
+
+.students-not-in-group h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.students-not-in-group ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.students-not-in-group li {
+  font-size: 14px;
+  color: #555;
 }
