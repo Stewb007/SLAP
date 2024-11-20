@@ -1,6 +1,7 @@
 import './styles/Admin.css'
 import Nav from './Nav'
 import React, { useEffect, useState } from 'react';
+import Messenger from './Messenger';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHandPointer, faArrowsRotate, faUserPlus, faUserMinus, faAsterisk, faUserLock, faPlusCircle, faMinusCircle, faTimesCircle, faEyeSlash, faEye} from '@fortawesome/free-solid-svg-icons';
 import { useUserSession, getCourses, getUsers, createUser, deleteUser, updateUser, deleteCourse, enrollUserInCourse, searchUserByEmail, usersInCourse, removeUserCourse, getSLAPS, createSLAP, updateSLAP, createCourse} from './firebase';
@@ -75,6 +76,7 @@ function Admin() {
                     </div>
                 </div>
             </div>
+            <Messenger />
         </div>
     );
 }

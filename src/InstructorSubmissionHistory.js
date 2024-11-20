@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { fetchAllStudentNames, fetchSubmissions } from "./firebase";
-import styles from "./styles/SubmissionAndEvaluation";
+import styles from "./SubmissionAndEvaluation";
 
 const InstructorSubmissionHistory = ({ assignment, courseCode }) => {
   const [studentNumbersToNamesMap, setStudentNumbersToNamesMap] = useState({});
