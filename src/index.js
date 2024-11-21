@@ -9,6 +9,7 @@ import Auth from './Auth';
 import Admin from './Admin';
 import reportWebVitals from './reportWebVitals';
 import ProtectedRoute from './ProtectedRoute';
+import Messenger from './Messenger';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -20,6 +21,7 @@ root.render(
           element={
             <ProtectedRoute>
               <Home />
+              <Messenger />
             </ProtectedRoute>
           }
         />
@@ -29,6 +31,7 @@ root.render(
           element={
             <ProtectedRoute>
               <CourseList />
+              <Messenger />
             </ProtectedRoute>
           }
         />
@@ -36,7 +39,8 @@ root.render(
           path="/Course/:courseCode"
           element={
             <ProtectedRoute>
-              <Course />
+              <Course />\
+              <Messenger />
             </ProtectedRoute>
           }
         />

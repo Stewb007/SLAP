@@ -4,7 +4,7 @@ import {
   fetchSubmissions,
   evaluateStudent,
 } from "./firebase";
-import styles from "./styles/SubmissionAndEvaluation";
+import styles from "./SubmissionAndEvaluation";
 
 const InstructorEvaluations = ({ assignment, courseCode }) => {
   const [studentNumberstoNamesMap, setStudentNumberstoNamesMap] = useState({});

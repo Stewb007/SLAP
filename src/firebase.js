@@ -906,3 +906,104 @@ export const fetchStudentGrade = async ({ assignmentId, courseCode, studentId })
   }
 };
 
+/** Gets the conversations for a specific user from the Firestore database.
+ * 
+ * @param {string} userId - The ID of the user. 
+ * 
+ */
+export const getConversations = async (userId) => {
+  try {
+    const conversationsRef = collection(db, 'messages');
+    const conversationsSnapshot = await getDocs(conversationsRef);
+    const conversations = conversationsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    return conversations.filter((conversation) => conversation.members.includes(userId));
+  } catch (error) {
+    console.error('Error getting conversations:', error);
+    throw error;
+  }
+}
+
+/** Gets the messages for a specific conversation from the Firestore database.
+ *  
+ * @param {string} conversationId - The ID of the conversation.
+ */
+export const getMessagesForConversation = async (conversationId) => {
+  try {
+    const conversationRef = doc(db, 'messages', conversationId);
+    const conversationDoc = await getDoc(conversationRef);
+    if (!conversationDoc.exists()) {
+      throw new Error('Conversation not found');
+    }
+
+    const conversationData = conversationDoc.data();
+    return conversationData.messages || [];
+  } catch (error) {
+    console.error('Error getting messages for conversation:', error);
+    throw error;
+  }
+}
+
+/**
+ *  Creates a new conversation in the Firestore database.
+ *  
+ *  @param {string} senderId - The ID of the sender.
+ *  @param {string} receiverEmail - The email of the receiver.
+ *  @param {string} initialMessage - The initial message.
+ */
+export const createConversation = async ({senderId, receiverId, initialMessage}) => {
+  try {
+    const receiver = await searchUserByEmail(receiverId);
+    const senderRef = doc(db, 'users', senderId);
+    const senderDoc = await getDoc(senderRef);
+    const senderData = senderDoc.data();
+    const conversationRef = await addDoc(collection(db, 'messages'), {
+      members: [senderId, receiver.id],
+      names: {sender: senderData.name, receiver: receiver.name},
+      messages: [
+        {
+          sender: senderData.name,
+          content: initialMessage,
+          createdAt: new Date().toString(),
+        },
+      ],
+    });
+    return conversationRef;
+  } catch (error) {
+    console.error('Error creating conversation:', error);
+    throw error;
+  }
+}
+
+/**
+ *  Adds a message to a conversation in the Firestore database.
+ *  
+ *  @param {string} conversationId - The ID of the conversation.
+ *  @param {string} name - The name of the sender.
+ *  @param {string} message - The message object containing the message content and sender.
+ */
+export const addMessageToConversation = async (conversationId, name, message) => {
+  try {
+    const conversationRef = doc(db, 'messages', conversationId);
+    const conversationDoc = await getDoc(conversationRef);
+    if (!conversationDoc.exists()) {
+      throw new Error('Conversation not found');
+    }
+    const conversationData = conversationDoc.data();
+    const messages = conversationData.messages || [];
+    messages.push(
+      {
+        sender: name,
+        content: message,
+        createdAt: new Date().toString(),
+      }
+    );
+
+    await updateDoc(conversationRef, { messages });
+  } catch (error) {
+    console.error('Error adding message to conversation:', error);
+    throw error;
+  }
+}
