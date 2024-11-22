@@ -13,6 +13,8 @@ import {
   deleteDoc,
   arrayUnion,
   arrayRemove,
+  writeBatch,
+  Timestamp,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -1007,3 +1009,129 @@ export const addMessageToConversation = async (conversationId, name, message) =>
     throw error;
   }
 }
+
+/**
+ * Adds a notification to all courses taught by a specific instructor.
+ *
+ * @param {string} instructorId - The ID of the instructor.
+ * @param {Object} notification - The notification object containing title and message.
+ * @returns {Promise<void>} A promise that resolves when the notification is added to all courses.
+ */
+export const addNotificationToAllCourses = async (instructorId, notification) => {
+  try {
+    const coursesRef = collection(db, 'courses');
+    const q = query(coursesRef, where('instructorId', '==', instructorId));
+    const querySnapshot = await getDocs(q);
+
+    const batch = writeBatch(db);
+    querySnapshot.forEach((doc) => {
+      const courseRef = doc.ref;
+      batch.update(courseRef, {
+        notifications: arrayUnion({
+          ...notification,
+          createdAt: new Date(),
+        }),
+      });
+    });
+
+    await batch.commit();
+  } catch (error) {
+    console.error('Error adding notification to all courses:', error);
+    throw error;
+  }
+};
+
+
+/**
+ * Adds an announcement for an instructor identified by email.
+ *
+ * @param {string} instructorEmail - The email of the instructor.
+ * @param {Object} announcement - The announcement object containing title and message.
+ * @returns {Promise<void>} A promise indicating completion.
+ */
+export const addInstructorAnnouncement = async (instructorId, announcement, courseIds = []) => {
+  try {
+    const announcementRef = await addDoc(collection(db, "instructorAnnouncements"), {
+      instructorId,
+      ...announcement,
+      courses: courseIds,
+      createdAt: Timestamp.now(),
+    });
+    return announcementRef;
+  } catch (error) {
+    console.error("Error adding instructor announcement:", error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves announcements for a specific instructor identified by email.
+ *
+ * @param {string} instructorEmail - The email of the instructor.
+ * @returns {Promise<Array<Object>>} An array of announcement objects from the database.
+ */
+export const getInstructorAnnouncements = async (instructorId) => {
+  try {
+    const announcementsRef = collection(db, "instructorAnnouncements");
+    const q = query(announcementsRef, where("instructorId", "==", instructorId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error getting instructor announcements:", error);
+    throw error;
+  }
+};
+
+export const getCoursesByInstructor = async (instructorId) => {
+  try {
+    const coursesRef = collection(db, "courses");
+    const q = query(coursesRef, where("instructorId", "==", instructorId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error getting courses by instructor:", error);
+    throw error;
+  }
+};
+
+export const addNotificationToEnrolledCourses = async (userId, notification) => {
+  try {
+    // Fetch the user's data
+    const userRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userRef);
+
+    if (!userDoc.exists()) {
+      console.error("User not found");
+      return;
+    }
+
+    const userData = userDoc.data();
+    const enrolledCourses = userData.enrolled || []; // Array of course codes (e.g., ["MTH108", "CS101"])
+
+    for (const courseCode of enrolledCourses) {
+      // Query the courses collection to find the course document by code
+      const coursesRef = collection(db, "courses");
+      const q = query(coursesRef, where("code", "==", courseCode));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        // Update the notifications array for each matching course
+        querySnapshot.forEach(async (doc) => {
+          const courseRef = doc.ref;
+          await updateDoc(courseRef, {
+            notifications: arrayUnion({
+              ...notification,
+              createdAt: new Date(),
+            }),
+          });
+          console.log(`Notification added to course: ${courseCode}`);
+        });
+      } else {
+        console.warn(`Course not found for code: ${courseCode}`);
+      }
+    }
+  } catch (error) {
+    console.error("Error adding notification to courses:", error);
+  }
+};
+

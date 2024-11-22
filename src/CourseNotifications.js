@@ -1,9 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/CourseNotifications.css';
-import { addCourseNotification, removeCourseNotification } from './firebase';
+import { addCourseNotification, removeCourseNotification, addNotificationToEnrolledCourses, getCoursesByInstructor } from './firebase';
 
 const CourseNotifications = ({ user, notifications, courseId, handleRefresh }) => {
   const [newNotification, setNewNotification] = useState('');
+  const [announcementScope, setAnnouncementScope] = useState('course'); // New state for scope
+  const [courses, setCourses] = useState([]);
+
+  // Fetch courses taught by the instructor
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const fetchedCourses = await getCoursesByInstructor(user.id);
+        setCourses(fetchedCourses);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    };
+    if (user.isInstructor) {
+      fetchCourses();
+    }
+  }, [user.id]);
 
   const handleCreateNotification = async () => {
     if (newNotification.trim()) {
@@ -13,7 +30,11 @@ const CourseNotifications = ({ user, notifications, courseId, handleRefresh }) =
       };
 
       try {
-        await addCourseNotification(courseId, notification);
+        if (announcementScope === 'course') {
+          await addCourseNotification(courseId, notification);
+        } else if (announcementScope === 'all') {
+          await addNotificationToEnrolledCourses(user.id, notification);
+        }
         handleRefresh(); // Trigger refresh to reload the notifications
         setNewNotification('');
       } catch (error) {
@@ -42,7 +63,14 @@ const CourseNotifications = ({ user, notifications, courseId, handleRefresh }) =
             onChange={(e) => setNewNotification(e.target.value)}
             placeholder="Enter new SLAP"
           />
-          <button onClick={handleCreateNotification}>Create new SLAPs</button>
+          <select
+            value={announcementScope}
+            onChange={(e) => setAnnouncementScope(e.target.value)}
+          >
+            <option value="course">This Course</option>
+            <option value="all">All Courses</option>
+          </select>
+          <button onClick={handleCreateNotification}>Create new SLAP</button>
         </div>
       )}
       <div className="notifications-board">

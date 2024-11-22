@@ -1,0 +1,61 @@
+.InstructorAnnouncements {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.InstructorAnnouncements h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.create-announcement {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.create-announcement input,
+.create-announcement textarea {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.create-announcement button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.create-announcement button:hover {
+  background-color: #0056b3;
+}
+
+.announcements-board {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.announcement {
+  background-color: white;
+  padding: 15px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.announcement h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.announcement p {
+  font-size: 14px;
+  color: #555;
+}
